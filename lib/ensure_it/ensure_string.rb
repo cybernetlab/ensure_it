@@ -1,6 +1,8 @@
 module EnsureIt
   patch Object do
-    def ensure_string(**opts); end
+    def ensure_string(**opts)
+      opts.key?(:wrong) ? opts[:wrong] : nil
+    end
 
     def ensure_string!(**opts)
       opts[:message] ||=

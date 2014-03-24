@@ -5,3 +5,18 @@ else
 end
 
 require 'ensure_it'
+
+module EnsureIt
+  module RefinesDynamicCaller
+    using EnsureIt
+
+    def ensure_symbol; ensure_symbol; end
+    def ensure_symbol!; ensure_symbol!; end
+    def ensure_string; ensure_string; end
+    def ensure_string!; ensure_string!; end
+    def ensure_integer; ensure_integer; end
+    def ensure_integer!; ensure_integer!; end
+    def ensure_float; ensure_float; end
+    def ensure_float!; ensure_float!; end
+  end
+end

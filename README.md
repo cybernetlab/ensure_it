@@ -14,6 +14,12 @@ Add this line to your application's Gemfile:
   gem 'ensure_it'
 ```
 
+or for [refinements](#refinements) version:
+
+```ruby
+  gem 'ensure_it', require: 'ensure_it_refines'
+```
+
 And then execute:
 
 ```sh
@@ -50,17 +56,27 @@ For bang methods you can override error class with `error` option and error mess
 
 ```ruby
 def awesome(arg)
-  arg = arg.ensure_symbol!(message: 'it\' unusual that #{subject} with name #{name} is not a symbol. Raised by #{method_name}')
+  arg = arg.ensure_symbol!(
+    error: ArgumentError,
+    message: 'it\'s bad that #{subject} with name #{name} is not a symbol.' \
+             ' Raised by #{method_name}'
+  )
 end
 
 awesome(0)
 ```
 
-will produce error message `it's unusual that 'arg' of 'awesome' method with name arg is not a symbol. Raised in ensure_symbol!`.
+will produce ArgumentError with message `it's unusual that 'arg' of 'awesome' method with name arg is not a symbol. Raised in ensure_symbol!`.
 
 ### ensure_symbol, ensure_symbol!
 
-Returns self for Symbol, converted value for String, nil (or raise) for other.
+Returns self for Symbol, converted value for String, nil (or raise) for other:
+
+```ruby
+:test.ensure_symbol # => :test
+'test'.ensure_symbol # => :test
+100.ensure_symbol # => nil
+```
 
 ### ensure_string, ensure_string!
 
@@ -84,7 +100,8 @@ By default, returns Fixnum or Bignum for Integer itself, rounded value for Float
 '1_200'.ensure_integer # => 1200
 '0x0a'.ensure_integer # => 10
 '0b100'.ensure_integer # => 4
-'010'.ensure_integer # => 10 !!! Octals are not accepted by default, use octal: true for this
+'010'.ensure_integer # => 10 !!! Octals are not accepted by default,
+                     #           use octal: true for this
 '010'.ensure_integer(octal: true) # => 8
 100.4.ensure_integer # => 100
 100.5.ensure_integer # => 101
@@ -93,7 +110,7 @@ true.ensure_integer(boolean: true) # => 1
 true.ensure_integer(boolean: 1000) # => 1000
 ```
 
-Be aware that octal numbers, beginning with `0` is not accepted by default, because its usage is rarely, that more common situaion to have leading zeroes in decimal numbers while loading data from something like csv file. To recognize zero-strated numbers as octals, use `octal: true` option.
+Be aware that octal numbers, beginning with `0` is not accepted by default, because its usage is rarely, that more common situation to have leading zeroes in decimal numbers while loading data from something like csv file. To recognize zero-strated numbers as octals, use `octal: true` option.
 
 ### ensure_float, ensure_float!
 
@@ -111,11 +128,63 @@ By default, returns Float for Numerics, converted Strings with strong check ('12
 true.ensure_float # => nil
 ```
 
+### ensure_float, ensure_float!
+
+By default, returns Array only for Array itself and **empty** array (not nil) for others. This method have many usefull optioins. Just list it in example:
+
+```ruby
+[1, nil, 2].ensure_array # => [1, nil, 2]
+true.ensure_array # => []
+true.ensure_array(wrong: nil) # => nil
+[1, nil, 2].ensure_array(compact: true) # => [1, 2]
+[1, [2, 3], 4].ensure_array(flatten: true) # => [1, 2, 3, 4]
+[1, [5, 6], 4].ensure_array(flatten: true, sorted: true) # => [1, 4, 5, 6]
+[1, [5, 6], 4].ensure_array(flatten: true, sorted: :desc) # => [6, 5, 4, 1]
+[1, [5, 6], 4].ensure_array(flatten: true, ordered: true) # => alias to sorted
+arr = ['some', nil, :value]
+arr.ensure_array(:ensure_symbol, compact: true) # => [:some, :value]
+arr.ensure_array(:ensure_symbol!, compact: true) # => raise on second element
+arr = ['some', :value]
+arr.ensure_array(:to_s) # => ['some', 'value'] standard methods can be used
+arr.ensure_array(:ensure_string, :to_sym) # => [:some, :value] you can chain methods
+```
+
+Simple usage example:
+
+```ruby
+require 'ensure_it'
+
+class Awesome
+  def self.define_getters(*args)
+    args.ensure_array(:ensure_symbol, compact: true).each do |n|
+      define_method(n) { instance_variable_get("@#{n}") }
+    end
+  end
+end
+
+Awesome.define_getters(:one, 'two', nil, false, Object, :three)
+Awesome.methods(false) #=> [:one, :two, :three]
+```
+
+### Common options for all non-bang methods
+
+|option|possible values|meaning|
+|------|---------------|-------|
+|`:wrong`|any|if present then will be used as wrong value instead of default `nil`|
+
+### Common options for all bang methods
+
+|option|possible values|meaning|
+|------|---------------|-------|
+|`:message`|`String`|custom error message|
+|`:error`|`Exception` class|custom error class|
+|`:smart`|`true` or `false`|use smart errors|
+
 ## Refinements
 
 Since ruby `2.0.0` [refinements](http://www.ruby-doc.org/core-2.1.1/doc/syntax/refinements_rdoc.html) mechanism intorduced and was experimental till `2.1.0`. Starting from `2.1.0` you can use it without warnings and in module and class scope.
 
-EnsureIt is fully tested and working with refinements. But not by default and not for ruby `< 2.1.0`. To use refined version of EnsureIt (with zero-monkey-pathing) just require `ensure_it_refines` instead `ensure_it`. If you use bundler, you can do it, by specifying `require: 'ensure_it_refines'` option for `gem 'ensure_it'` in your `Gemfile`:
+EnsureIt is fully tested and working with refinements. But not by default and not for ruby `< 2.1.0`. To use refined version of EnsureIt (with zero-monkey-pathing) just require `ensure_it_refines` instead of `ensure_it`. If you use bundler, you can do it, by specifying `require: 'ensure_it_refines'` option for `gem 'ensure_it'` in your `Gemfile`:
 
 ```ruby
 gem 'ensure_it', require: 'ensure_it_refines'
@@ -146,7 +215,7 @@ AwesomeClass.new.awesome_method(0) # => raises EnsureIt::Error with message
                                    #  method should be a Symbol or a String"
 ```
 
-Please read carefully refinements documentation before refined EnsureIt. Don't forget to call `using EnsureIt` in every file (not class or method if your class or method placed in many files) you need it.
+Please read carefully [refinements](http://www.ruby-doc.org/core-2.1.1/doc/syntax/refinements_rdoc.html) documentation before using refined EnsureIt. Don't forget to call `using EnsureIt` in every file (not class or method if your class or method placed in many files) you need it.
 
 ## Changelog
 

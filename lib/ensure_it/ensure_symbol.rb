@@ -1,6 +1,8 @@
 module EnsureIt
   patch Object do
-    def ensure_symbol(**opts); end
+    def ensure_symbol(**opts)
+      opts.key?(:wrong) ? opts[:wrong] : nil
+    end
 
     def ensure_symbol!(**opts)
       opts[:message] ||= '#{subject} should be a Symbol or a String'

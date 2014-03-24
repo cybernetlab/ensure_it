@@ -2,7 +2,9 @@ module EnsureIt
   FLOAT_REGEXP = /\A[+\-]?(?:\d+(?:\.\d*)?|\d*\.\d+)(?:[eE][+\-]?\d+)?\z/
 
   patch Object do
-    def ensure_float(**opts); end
+    def ensure_float(**opts)
+      opts.key?(:wrong) ? opts[:wrong] : nil
+    end
 
     def ensure_float!(**opts)
       opts[:message] ||= '#{subject} should be a float or be able' \

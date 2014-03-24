@@ -5,7 +5,9 @@ module EnsureIt
   BIN_REGEXP = /\A0b[01]+\z/
 
   patch Object do
-    def ensure_integer(**opts); end
+    def ensure_integer(**opts)
+      opts.key?(:wrong) ? opts[:wrong] : nil
+    end
 
     def ensure_integer!(**opts)
       opts[:message] ||= '#{subject} should be an integer or be able' \
