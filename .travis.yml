@@ -5,4 +5,4 @@ rvm:
   - ruby-head
 env:
   - USE_REFINES=true
-  -
+  - USE_REFINES=false

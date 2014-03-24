@@ -1,4 +1,4 @@
-if ENV['USE_REFINES']
+if ENV['USE_REFINES'] == 'true'
   require 'ensure_it_refines'
 else
   require 'ensure_it'
