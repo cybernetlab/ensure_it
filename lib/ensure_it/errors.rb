@@ -10,9 +10,6 @@ module EnsureIt
       unless method_name.is_a?(Symbol)
         raise ArgumentError, 'EnsureIt: Wrong method_name argument for Error'
       end
-      unless message.is_a?(String)
-        raise ArgumentError, 'EnsureIt: Wrong message argument for Error'
-      end
       @method_name, @message, @backtrace = method_name, message, backtrace
     end
 
@@ -48,18 +45,28 @@ module EnsureIt
     end
 
     def message
+      unless @message.is_a?(String)
+        @message =
+          if @subject.nil? && @subject_type != :unknown_method_result
+            '#{subject}'
+          else
+            '#{subject} of #{method_name}'
+          end
+      end
       @message.gsub(/\#\{subject\}/, subject_display_name)
+              .gsub(/\#\{name\}/, @subject.to_s)
+              .gsub(/\#\{method_name\}/, @method_name.to_s)
     end
   end
 
-  def self.raise_error(method_name, message, error_class = Error, **opts)
-    error_class = Error unless error_class <= Exception
-    error = ErrorMessage.new(method_name, message, caller[1..-1])
+  def self.raise_error(method_name, message: nil, error: Error, **opts)
+    error = Error unless error <= Exception
+    error_msg = ErrorMessage.new(method_name, message, caller[1..-1])
     if opts.key?(:smart) && opts[:smart] != true ||
        EnsureIt.config.errors != :smart
       raise error_class, error.message, error.backtrace
     end
-    raise_smart_error(error, error_class, **opts)
+    raise_smart_error(error_msg, error, **opts)
   end
 
   def self.raise_smart_error(error, error_class, **opts)

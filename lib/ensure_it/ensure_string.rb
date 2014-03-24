@@ -3,13 +3,13 @@ module EnsureIt
     def ensure_string(**opts); end
 
     def ensure_string!(**opts)
-      msg =
+      opts[:message] ||=
         if opts[:numbers] == true
           '#{subject} should be a String, Symbol, Numeric or Rational'
         else
           '#{subject} should be a String or a Symbol'
         end
-      EnsureIt.raise_error(:ensure_string!, msg, **opts)
+      EnsureIt.raise_error(:ensure_string!, **opts)
     end
   end
 

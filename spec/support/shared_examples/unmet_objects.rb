@@ -28,17 +28,17 @@ shared_examples 'niller for unmet objects' do |*add, except: []|
   end
 end
 
-shared_examples 'banger for unmet objects' do |*add, except: [],
-                                               error: EnsureIt::Error,
-                                               message: nil|
+shared_examples 'banger for unmet objects' do |*add, except: [], **opts|
   it 'raises error' do
     objects = compose_objects(add, except)
     expect(EnsureIt).to receive(:raise_error)
       .exactly(objects.size).times.and_call_original
+    err = [opts[:error] || EnsureIt::Error]
+    err << opts[:message] if opts.key?(:message)
     objects.each do |obj|
       expect {
         call_for(obj)
-      }.to raise_error(*[error, message].compact)
+      }.to raise_error(*err)
     end
   end
 end

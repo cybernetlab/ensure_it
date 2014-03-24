@@ -24,12 +24,28 @@ describe EnsureIt do
       expect(call_for(obj)).to eq obj
     end
 
-    it 'and converts strings' do
+    it 'and converts decimal strings' do
       expect(call_for('-100')).to eq(-100)
     end
 
-    it 'and converts symbols' do
-      expect(call_for(:'100')).to eq(100)
+    it 'and converts decimal strings with delimiter' do
+      expect(call_for('1_200')).to eq(1200)
+    end
+
+    it 'and converts hex strings' do
+      expect(call_for('0x0a')).to eq(10)
+    end
+
+    it 'and converts binary strings' do
+      expect(call_for('0b100')).to eq(4)
+    end
+
+    it 'and converts octal strings as decimal' do
+      expect(call_for('010')).to eq(10)
+    end
+
+    it 'and converts octal strings as octal with octal: true' do
+      expect(call_for('010', octal: true)).to eq(8)
     end
 
     it 'and rounds floats' do
@@ -56,7 +72,7 @@ describe EnsureIt do
     it_behaves_like 'numerizer'
     it_behaves_like(
       'niller for unmet objects',
-      '123test', :test123,
+      '123test', :test123, :'100',
       except: [String, Symbol, Integer, Float, Rational]
     )
   end
@@ -65,7 +81,7 @@ describe EnsureIt do
     it_behaves_like 'numerizer'
     it_behaves_like(
       'banger for unmet objects',
-      '123test', :test123,
+      '123test', :test123, :'100',
       except: [String, Symbol, Integer, Float, Rational],
       message: /should be an integer or be able to convert to it/
     )

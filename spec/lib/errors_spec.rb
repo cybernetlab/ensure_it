@@ -12,20 +12,20 @@ describe EnsureIt do
 
     it 'raises EnsureIt::Error by default' do
       expect {
-        call_error(:test_method, 'test')
-      }.to raise_error EnsureIt::Error, 'test'
+        call_error(:test_method)
+      }.to raise_error EnsureIt::Error
     end
 
-    it 'raises EnsureIt::Error error for wrong error_class argument' do
+    it 'raisesspecified error and message' do
       expect {
-        call_error(:test_method, 'test', ArgumentError)
+        call_error(:test_method, error: ArgumentError, message: 'test')
       }.to raise_error ArgumentError, 'test'
     end
 
     it 'raises error with callers backtrace' do
       backtrace = nil
       begin
-        call_error(:test_method, '')
+        call_error(:test_method)
       rescue EnsureIt::Error => e
         backtrace = e.backtrace
       end
@@ -42,59 +42,59 @@ describe EnsureIt do
       def test_unknown_caller
         local = ''
         local
-          .to_s; call_error(:to_s, '#{subject}')
+          .to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_local_caller
         local = ''
-        local.to_s; call_error(:to_s, '#{subject}')
+        local.to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_instance_caller
         @instance = ''
-        @instance.to_s; call_error(:to_s, '#{subject}')
+        @instance.to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_class_caller
         backup = $VERBOSE
         $VERBOSE = nil
         @@class = ''
-        @@class.to_s; call_error(:to_s, '#{subject}')
+        @@class.to_s; call_error(:to_s, message: '#{subject}')
         $VERBOSE = backup
       end
 
       def test_method_1_caller
         local = ''
-        local.to_sym.to_s; call_error(:to_s, '#{subject}')
+        local.to_sym.to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_method_2_caller
         local = ''
-        local.to_sym().to_s; call_error(:to_s, '#{subject}')
+        local.to_sym().to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_argument_1_caller(arg_1)
-        arg_1.to_s; call_error(:to_s, '#{subject}')
+        arg_1.to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_argument_2_caller(*args)
-        args.to_s; call_error(:to_s, '#{subject}')
+        args.to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_argument_3_caller(arg_1 = 'test')
-        arg_1.to_s; call_error(:to_s, '#{subject}')
+        arg_1.to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_argument_4_caller(arg_1: 'test')
-        arg_1.to_s; call_error(:to_s, '#{subject}')
+        arg_1.to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_argument_5_caller(**opts)
-        opts.to_s; call_error(:to_s, '#{subject}')
+        opts.to_s; call_error(:to_s, message: '#{subject}')
       end
 
       def test_argument_6_caller(&block)
-        block.to_s; call_error(:to_s, '#{subject}')
+        block.to_s; call_error(:to_s, message: '#{subject}')
       end
 
       {

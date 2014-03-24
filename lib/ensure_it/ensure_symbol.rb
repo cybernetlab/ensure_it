@@ -3,11 +3,8 @@ module EnsureIt
     def ensure_symbol(**opts); end
 
     def ensure_symbol!(**opts)
-      EnsureIt.raise_error(
-        :ensure_symbol!,
-        '#{subject} should be a Symbol or a String',
-        **opts
-      )
+      opts[:message] ||= '#{subject} should be a Symbol or a String'
+      EnsureIt.raise_error(:ensure_symbol!, **opts)
     end
   end
 

@@ -46,8 +46,8 @@ module EnsureItExampleGroup
     Tester.new(obj).send(described_method, *args)
   end
 
-  def call_error(method_name, message, error_class = EnsureIt::Error, test = nil)
-    EnsureIt.raise_error(method_name, message, error_class)
+  def call_error(method_name, **opts)
+    EnsureIt.raise_error(method_name, **opts)
   end
 
   def get_error

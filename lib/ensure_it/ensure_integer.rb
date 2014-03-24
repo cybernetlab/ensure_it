@@ -1,21 +1,16 @@
 module EnsureIt
-  INTEGER_REGEXP = /\A[+\-]?\d+\z/
+  OCT_REGEXP = /\A0\d+\z/
+  INT_REGEXP = /\A[+\-]?\d[\d_]*\z/
+  HEX_REGEXP = /\A0x[0-9a-zA-Z]+\z/
+  BIN_REGEXP = /\A0b[01]+\z/
 
   patch Object do
     def ensure_integer(**opts); end
 
     def ensure_integer!(**opts)
-      #msg =
-      #  if opts[:numbers] == true
-      #    '#{subject} should be an integer or be able to convert to it'
-      #  else
-      #    '#{subject} should be a String or a Symbol'
-      #  end
-      EnsureIt.raise_error(
-        :ensure_integer!,
-        '#{subject} should be an integer or be able to convert to it',
-        **opts
-      )
+      opts[:message] ||= '#{subject} should be an integer or be able' \
+                         ' to convert to it'
+      EnsureIt.raise_error(:ensure_integer!, **opts)
     end
   end
 
@@ -23,25 +18,17 @@ module EnsureIt
     using EnsureIt if ENSURE_IT_REFINES
 
     def ensure_integer(**opts)
-      INTEGER_REGEXP =~ self ? self.to_i : nil
+      case self
+      when OCT_REGEXP then opts[:octal] == true ? self.to_i(8) : self.to_i
+      when INT_REGEXP then self.to_i
+      when HEX_REGEXP then self[2..-1].to_i(16)
+      when BIN_REGEXP then self[2..-1].to_i(2)
+      else nil
+      end
     end
 
     def ensure_integer!(**opts)
-      INTEGER_REGEXP =~ self ? self.to_i : super(**opts)
-    end
-  end
-
-  patch Symbol do
-    using EnsureIt if ENSURE_IT_REFINES
-
-    def ensure_integer(**opts)
-      str = self.to_s
-      INTEGER_REGEXP =~ str ? str.to_i : nil
-    end
-
-    def ensure_integer!(**opts)
-      str = self.to_s
-      INTEGER_REGEXP =~ str ? str.to_i : super(**opts)
+      ensure_integer(**opts) || super(**opts)
     end
   end
 
