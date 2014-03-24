@@ -55,7 +55,8 @@ module EnsureIt
   def self.raise_error(method_name, message, error_class = Error, **opts)
     error_class = Error unless error_class <= Exception
     error = ErrorMessage.new(method_name, message, caller[1..-1])
-    if opts[:smart] != true && EnsureIt.config.errors != :smart
+    if opts.key?(:smart) && opts[:smart] != true ||
+       EnsureIt.config.errors != :smart
       raise error_class, error.message, error.backtrace
     end
     raise_smart_error(error, error_class, **opts)

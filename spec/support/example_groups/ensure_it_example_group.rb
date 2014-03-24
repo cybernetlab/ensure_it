@@ -15,17 +15,6 @@ end
 module EnsureItExampleGroup
   def self.fake_method; end
 
-  FIXNUM_MAX = (2 ** (0.size * 8 - 2) - 1)
-  BIGNUM = FIXNUM_MAX + 100
-  FIXNUM = FIXNUM_MAX - 100
-
-  GENERAL_OBJECTS = [
-    [], {}, FIXNUM, BIGNUM, 0.1, true, false, nil, 0..5,
-    '2/3'.to_r, /regexp/, 'string', :symbol,
-    ->{}, proc {}, method(:fake_method),
-    Object.new, Class.new, Module.new, Struct.new(:field), Time.new
-  ]
-
   def self.included(base)
     base.instance_eval do
       metadata[:type] = :ensure_it

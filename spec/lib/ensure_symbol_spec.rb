@@ -14,25 +14,25 @@ end
 
 describe EnsureIt do
   shared_examples 'symbolizer' do
-    it 'returns self for symbol' do
+    it 'and returns self for symbol' do
       expect(call_for(:test)).to eq :test
     end
 
-    it 'converts string to symbol' do
+    it 'and converts string to symbol' do
       expect(call_for('test')).to eq :test
     end
   end
 
   describe '#ensure_symbol' do
     it_behaves_like 'symbolizer'
-    it_behaves_like 'niller for unmet objects', String, Symbol
+    it_behaves_like 'niller for unmet objects', except: [String, Symbol]
   end
 
   describe '#ensure_symbol!' do
     it_behaves_like 'symbolizer'
     it_behaves_like(
       'banger for unmet objects',
-      String, Symbol,
+      except: [String, Symbol],
       message: /should be a Symbol or a String/
     )
   end
