@@ -1,3 +1,6 @@
+[![Code Climate](https://codeclimate.com/github/cybernetlab/ensure_it.png)](https://codeclimate.com/github/cybernetlab/ensure_it)
+[![Build Status](https://travis-ci.org/cybernetlab/ensure_it.svg?branch=master)](https://travis-ci.org/cybernetlab/ensure_it)
+
 # EnsureIt
 
 This library provides way to check and converts local variables for every-method usage, like arguments checking.
