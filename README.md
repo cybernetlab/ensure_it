@@ -1,3 +1,4 @@
+[![Gem Version](https://badge.fury.io/rb/ensure_it.png)](http://badge.fury.io/rb/ensure_it)
 [![Code Climate](https://codeclimate.com/github/cybernetlab/ensure_it.png)](https://codeclimate.com/github/cybernetlab/ensure_it)
 [![Build Status](https://travis-ci.org/cybernetlab/ensure_it.svg?branch=master)](https://travis-ci.org/cybernetlab/ensure_it)
 [![Coverage Status](https://coveralls.io/repos/cybernetlab/ensure_it/badge.png?branch=master)](https://coveralls.io/r/cybernetlab/ensure_it?branch=master)
