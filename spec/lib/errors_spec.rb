@@ -60,6 +60,7 @@ describe EnsureIt do
         $VERBOSE = nil
         @@class = ''
         @@class.to_s; call_error(:to_s, message: '#{subject}')
+      ensure
         $VERBOSE = backup
       end
 

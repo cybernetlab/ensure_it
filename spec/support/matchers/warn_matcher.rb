@@ -1,6 +1,6 @@
 RSpec::Matchers.define :warn do |message|
   match do |block|
-    output = fake_stderr(&block)
+    output = capture_stderr(&block)
     message.is_a?(Regexp) ? message.match(output) : output.include?(message)
   end
 
@@ -17,12 +17,14 @@ RSpec::Matchers.define :warn do |message|
   end
 
   # Fake STDERR and return a string written to it.
-  def fake_stderr
+  def capture_stderr(&block)
     original_stderr = $stderr
-    $stderr = StringIO.new
-    yield
-    $stderr.string
-  ensure
-    $stderr = original_stderr
+    $stderr = fake = StringIO.new
+    begin
+      yield
+    ensure
+      $stderr = original_stderr
+    end
+    fake.string
   end
 end
