@@ -36,6 +36,14 @@ shared_examples 'empty array creator for unmet objects' do |*add, except: []|
   end
 end
 
+shared_examples 'empty hash creator for unmet objects' do |*add, except: []|
+  it 'returns empty array' do
+    compose_objects(add, except).each do |obj|
+      expect(call_for(obj)).to eq({})
+    end
+  end
+end
+
 shared_examples 'banger for unmet objects' do |*add, except: [], **opts|
   it 'raises error' do
     objects = compose_objects(add, except)

@@ -32,6 +32,19 @@ Or install it yourself as:
 $ gem install ensure_it
 ```
 
+## Configuration
+
+For this moment only one configuration option available - global setting of smart errors (see [Usage section](usage)):
+
+```ruby
+require 'ensure_it'
+
+EnsureIt.configuration do |config|
+  # config.errors = :standard
+  config.errors = :smart
+end
+```
+
 ## Usage
 
 EnsureIt does monkey-patching or provides refines (see [Refinements section](#refinements)) for general ruby objects with set of `ensure_*` methods. So you can call this methods with everything in ruby. Corresponding to method name it returns `nil` (or raise exception for bang version of method, that name ended with `!`) for unusual or impossible type conversions and returns object of ensured type if conversion is possible.
@@ -128,7 +141,7 @@ By default, returns Float for Numerics, converted Strings with strong check ('12
 true.ensure_float # => nil
 ```
 
-### ensure_float, ensure_float!
+### ensure_array, ensure_array!
 
 By default, returns Array only for Array itself and **empty** array (not nil) for others. This method have many usefull optioins. Just list it in example:
 
@@ -164,6 +177,46 @@ end
 
 Awesome.define_getters(:one, 'two', nil, false, Object, :three)
 Awesome.methods(false) #=> [:one, :two, :three]
+```
+
+### ensure_hash, ensure_hash!
+
+Returns Hash only for Hash itself and **empty** hash (not nil) for others. Symbolizes keys with `symbolize_keys: true` option:
+
+```ruby
+{some: 0, 'key' => 1}.ensure_hash # => {some: 0, 'key' => 1}
+0.ensure_hash # => {}
+0.ensure_hash(wrong: nil) # => nil
+{some: 0, 'key' => 1}.ensure_hash(symbolize_keys: true) # => {some: 0, key: 0}
+```
+
+### ensure_instance_of, ensure_instance_of!
+
+Returns self only if it instance of specified class or nil (or raise) elsewhere:
+
+```ruby
+10.ensure_instance_of(Fixnum) # => 10
+10.0.ensure_instance_of(Fixnum) # => nil
+10.0.ensure_instance_of(Fixnum, wrong: -1) # => -1
+```
+
+### ensure_class, ensure_class!
+
+Returns self only if it is a class and optionally have specified ancestors or nil (or raise) elsewhere:
+
+```ruby
+10.ensure_class # => nil
+String.ensure_class # => String
+Fixnum.ensure_class(Integer) # => Fixnum
+Float.ensure_class(Integer) # => nil
+
+module CustomModule; end
+class CustomArray < Array;
+  include CustomModule
+end
+CustomArray.ensure_class(Enumerable, CustomModule) # => CustomArray
+Array.ensure_class(Enumerable, CustomModule) # => nil
+Array.ensure_class(Enumerable) # => Array
 ```
 
 ### Common options for all non-bang methods
@@ -228,10 +281,19 @@ Please read carefully [refinements](http://www.ruby-doc.org/core-2.1.1/doc/synta
     - ensure_array
     - ensure_hash
     - ensure_instance_of
+    - ensure_class
 
 ## Versions
 
 `0.x.x` is pre-release. After some testing in real applications, `1.x.x` as first release will be started.
+
+## Todo
+
+* enlarge method set
+* enlarge number of options for arrays and hashes
+* block processing for arrays and hashes
+* benchmarking and profiling
+* custom extending functionality support
 
 ## Contributing
 
