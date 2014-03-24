@@ -1,5 +1,5 @@
-require 'coveralls'
-Coveralls.wear!
+#require 'coveralls'
+#Coveralls.wear!
 
 if ENV['USE_REFINES'] == 'true'
   require 'ensure_it_refines'
