@@ -30,7 +30,7 @@ describe EnsureIt do
         expect {
           load_refines
         }.to warn('EsureIt: refines supported only for ruby >= 2.1')
-        expect(ENSURE_IT_REFINES).to_not be_true
+        expect(ENSURE_IT_REFINES).to be_false
       end
     end
   end
