@@ -11,7 +11,7 @@ module EnsureIt
   end
 
   patch Class do
-    using EnsureIt
+    using EnsureIt if ENSURE_IT_REFINES
 
     def ensure_class(*args, **opts)
       args.select! { |x| x.is_a?(Module) }
