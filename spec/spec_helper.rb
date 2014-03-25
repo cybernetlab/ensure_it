@@ -13,8 +13,8 @@ end
 #    config.errors = :standard
 #  end
 #
-#  require 'coveralls'
-#  Coveralls.wear!
+require 'coveralls'
+Coveralls.wear!
 #end
 
 
