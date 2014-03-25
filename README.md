@@ -277,6 +277,9 @@ Please read carefully [refinements](http://www.ruby-doc.org/core-2.1.1/doc/synta
 
 ## Changelog
 
+`0.1.1`
+* fixed: no error_class in standard errors mode
+
 `0.1.0`
 * set of methods for beginning:
     - ensure_symbol

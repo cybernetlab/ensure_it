@@ -64,7 +64,7 @@ module EnsureIt
     error_msg = ErrorMessage.new(method_name, message, caller[1..-1])
     if opts.key?(:smart) && opts[:smart] != true ||
        EnsureIt.config.errors != :smart
-      raise error_class, error.message, error.backtrace
+      raise error, error_msg.message, error_msg.backtrace
     end
     raise_smart_error(error_msg, error, **opts)
   end
