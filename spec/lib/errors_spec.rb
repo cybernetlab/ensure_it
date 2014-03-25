@@ -6,17 +6,25 @@ describe EnsureIt::Error do
   end
 end
 
-describe EnsureIt do
-  describe '.raise_error' do
-    after { EnsureIt::Config.instance_variable_set(:@errors, nil) }
 
+describe EnsureIt do
+  before do
+    @errors = EnsureIt.config.errors
+    EnsureIt::Config.instance_variable_set(:@errors, nil)
+  end
+
+  after do
+    EnsureIt::Config.instance_variable_set(:@errors, @errors)
+  end
+
+  describe '.raise_error' do
     it 'raises EnsureIt::Error by default' do
       expect {
         call_error(:test_method)
       }.to raise_error EnsureIt::Error
     end
 
-    it 'raisesspecified error and message' do
+    it 'raises specified error and message' do
       expect {
         call_error(:test_method, error: ArgumentError, message: 'test')
       }.to raise_error ArgumentError, 'test'
