@@ -1,5 +1,3 @@
-#using EnsureIt if ENSURE_IT_REFINES
-
 def fake_method; end
 
 FIXNUM_MAX = (2 ** (0.size * 8 - 2) - 1)

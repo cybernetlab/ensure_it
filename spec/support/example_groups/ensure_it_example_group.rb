@@ -13,21 +13,10 @@ class Tester
 end
 
 module EnsureItExampleGroup
-  def self.fake_method; end
-
   def self.included(base)
     base.instance_eval do
       metadata[:type] = :ensure_it
     end
-  end
-
-  def general_objects(&block)
-    enum = GENERAL_OBJECTS.each
-    enum.define_singleton_method :except do |*classes|
-      classes = classes.flatten.select { |x| x.is_a?(Class) }
-      reject { |obj| classes.any? { |c| obj.is_a?(c) } }
-    end
-    block_given? ? enum.each(&block) : enum
   end
 
   def described_method
@@ -48,12 +37,6 @@ module EnsureItExampleGroup
 
   def call_error(method_name, **opts)
     EnsureIt.raise_error(method_name, **opts)
-  end
-
-  def get_error
-    yield
-  rescue EnsureIt::Error => e
-    e
   end
 
   RSpec.configure do |config|

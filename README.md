@@ -39,7 +39,7 @@ $ gem install ensure_it
 
 ## Configuration
 
-For this moment only one configuration option available - global setting of smart errors (see [Usage section](usage)):
+For this moment only one configuration option available - global setting of smart errors (see [Usage section](#usage)):
 
 ```ruby
 require 'ensure_it'
@@ -52,11 +52,11 @@ end
 
 ## Usage
 
-EnsureIt does monkey-patching or provides refines (see [Refinements section](#refinements)) for general ruby objects with set of `ensure_*` methods. So you can call this methods with everything in ruby. Corresponding to method name it returns `nil` (or raise exception for bang version of method, that name ended with `!`) for unusual or impossible type conversions and returns object of ensured type if conversion is possible.
+EnsureIt does monkey-patching or provides refines (see [Refinements section](#refinements)) for generic ruby objects with set of `ensure_*` methods. So you can call this methods with everything in ruby. Corresponding to method name it returns `nil` (or raise exception for bang version of method, that name ended with `!`) for unusual or impossible type conversions and returns object of ensured type if conversion is possible.
 
 For example `ensure_symbol` method returns symbol itself for Symbols, converted to symbol value for Strings and nil for all other. Same way `ensure_symbol!` returns symbol for String and Symbol, and raises exception for all other.
 
-The special thing, that EnsureIt can do (and do it by default) is smart error messages in bang methods. In most cases, EnsureIt guesses right context in wich `ensure_*` method called and froms more informative message. It recognizes name of local variable if method called for variable like `my_var.ensure_symbol`, argument name, if variable is argument of method and method calls itself like `'some_string'.to_sym.ensure_symbol` - so `ensure_symbol` called on result of `to_sym` method. You can disable this functionality at all (see [Configuration section](configuration)) or override globally configuration for any method call by `smart` option like this `:symbol.ensure_symbol(smart: true)` or `:symbol.ensure_symbol(smart: false)`. In any way, this `:smart` errors doesn't affect execution speed because the analyzing block of code executed only on exception - not on every `ensure_*` call.
+The special thing, that EnsureIt can do (and do it by default) is smart error messages in bang methods. In most cases, EnsureIt guesses right context in wich `ensure_*` method called and froms more informative message. It recognizes name of local variable if method called for variable like `my_var.ensure_symbol`, argument name, if variable is argument of method and method calls itself like `'some_string'.to_sym.ensure_symbol` - so `ensure_symbol` called on result of `to_sym` method. You can disable this functionality at all (see [Configuration section](#configuration)) or override globally configuration for any method call by `smart` option like this `:symbol.ensure_symbol(smart: true)` or `:symbol.ensure_symbol(smart: false)`. In any way, this `:smart` errors doesn't affect execution speed because the analyzing block of code executed only on exception - not on every `ensure_*` call.
 
 For example, following code
 
@@ -84,7 +84,7 @@ end
 awesome(0)
 ```
 
-will produce ArgumentError with message `it's unusual that 'arg' of 'awesome' method with name arg is not a symbol. Raised in ensure_symbol!`.
+will produce ArgumentError with message `it's bad that 'arg' of 'awesome' method with name arg is not a symbol. Raised in ensure_symbol!`.
 
 ### ensure_symbol, ensure_symbol!
 
