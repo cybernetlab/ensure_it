@@ -123,7 +123,12 @@ describe EnsureIt do
         it "finds #{var} name" do
           m = method("test_#{var}_caller")
           args = [true] * (m.arity < 0 ? -m.arity - 1 : m.arity)
-          error = get_error { m.call(*args) }
+          error = nil
+          begin
+            m.call(*args)
+          rescue EnsureIt::Error => err
+            error = err
+          end
           expect(error.message).to eq message
         end
       end

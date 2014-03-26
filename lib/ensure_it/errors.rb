@@ -62,19 +62,20 @@ module EnsureIt
   def self.raise_error(method_name, message: nil, error: Error, **opts)
     error = Error unless error <= Exception
     error_msg = ErrorMessage.new(method_name, message, caller[1..-1])
-    if opts.key?(:smart) && opts[:smart] != true ||
-       EnsureIt.config.errors != :smart
-      raise error, error_msg.message, error_msg.backtrace
+    # save message in backtrace in variables to not call getter
+    # methods of error_msg instance in raise call
+    error_message = error_msg.message
+    error_backtrace = error_msg.backtrace
+    if opts[:smart] == true || EnsureIt.config.errors == :smart
+      inspect_source(error_msg, **opts)
+      activate_smart_errors(error_msg, **opts)
     end
-    raise_smart_error(error_msg, error, **opts)
+    raise error, error_message, error_backtrace
   end
 
-  def self.raise_smart_error(error, error_class, **opts)
-    inspect_source(error, **opts)
+  def self.activate_smart_errors(error, **opts)
     tp_count = 0
     error_obj = nil
-    error_message = error.message
-    error_backtrace = error.backtrace
     #
     # first trace point is to capture raise object before exitting
     # from :ensure_* method
@@ -88,30 +89,24 @@ module EnsureIt
       else
         # skip returns from :raise_smart_error and :raise_error
         tp_count += 1
-        if tp_count > 1
-          # at this moment we are at end of 'ensure_' method
+        if tp_count > 2
           first_tp.disable
-          TracePoint.trace(:return) do |second_tp|
-            # skip return from :ensure_* method
-            tp_count += 1
-            if tp_count > 3
-              # now we are in caller context
-              second_tp.disable
-              unless error_obj.nil?
-                # inspect caller code
-                inspect_code(second_tp, error, **opts)
-                # patch error message
-                error_obj.extend(Module.new do
-                  @@ensure_it_message = error.message
-                  def message; @@ensure_it_message; end
-                end)
-              end
+          # at this moment we are at the end of 'ensure_' method
+          # skip last code line in :ensure_* method
+          TracePoint.trace(:return, :line) do |second_tp|
+            # now we are in caller context
+            second_tp.disable
+            unless error_obj.nil?
+              # inspect caller code
+              inspect_code(second_tp, error, **opts)
+              # patch error message
+              msg = error.message
+              error_obj.define_singleton_method(:message) { msg }
             end
           end
         end
       end
     end
-    raise error_class, error_message, error_backtrace
   end
 
   def self.inspect_source(error, **opts)
@@ -168,6 +163,6 @@ module EnsureIt
     line
   end
 
-  private_class_method :raise_smart_error, :inspect_source, :inspect_code,
+  private_class_method :activate_smart_errors, :inspect_source, :inspect_code,
                        :read_line_number
 end
