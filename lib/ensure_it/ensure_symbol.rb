@@ -1,6 +1,7 @@
 module EnsureIt
   patch Object do
     def ensure_symbol(**opts)
+      return nil if opts.empty?
       opts.key?(:wrong) ? opts[:wrong] : nil
     end
 

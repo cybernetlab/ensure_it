@@ -275,10 +275,63 @@ AwesomeClass.new.awesome_method(0) # => raises EnsureIt::Error with message
 
 Please read carefully [refinements](http://www.ruby-doc.org/core-2.1.1/doc/syntax/refinements_rdoc.html) documentation before using refined EnsureIt. Don't forget to call `using EnsureIt` in every file (not class or method if your class or method placed in many files) you need it.
 
+## Benchmarking
+
+In development mode a set of thor tasks under 'ensure_it:benchmark' namespace provided for benchmarking and profiling any library method. Also tasks `:non_bang`, `:bang` and `:all` provided for benchmarking all non-bang methods, all bang methods and allmost all methods respectively. To benchmark refined version of library, use `USE_REFINES=true` environment variable.
+
+```sh
+thor ensure_it:benchmark:symbol   # benchmark #ensure_symbol method
+thor ensure_it:benchmark:symbol!  # benchmark #ensure_symbol! method
+thor ensure_it:benchmark:non_bang # benchmark all non-bang methods
+thor ensure_it:benchmark:all      # benchmark all library methods
+USE_REFINES=true thor ensure_it:benchmark:all # benchmark refined library
+```
+
+Some results on my machine:
+
+```
+$ thor ensure_it:benchmark:symbol
+Starting benchmarks for #ensure_symbol  with monkey-patched version of EnsureIt. Errors: standard. Ruby version: 2.1.1
+ensure_it:      0.070000   0.000000   0.070000 (  0.071321)
+standard way:   0.060000   0.000000   0.060000 (  0.052894)
+
+$ thor ensure_it:benchmark:symbol!
+Starting benchmarks for #ensure_symbol!  with monkey-patched version of EnsureIt. Errors: standard. Ruby version: 2.1.1
+ensure_it:      6.110000   0.010000   6.120000 (  6.498998)
+standard way:   0.430000   0.000000   0.430000 (  0.448031)
+```
+
+As you can see, call to `#esnure_symbol` is very close to standard type checking (number of benchmark runs - 10000), but bang version consumes much more time. This because we need to do some job to grab information from code for error message. And, of course, this code will execute only when error occured. Call to bang method for expected values (Symbols and Strings in this case) consume same time, as for normal `#ensure_symbol`.
+
+Some options available for benchmarking.
+
+### profiling
+`-p` or `--profile=true` or `--profile=/ouput/dir`. Turns on profiling. If you specify profiling as boolean option, all progiling output will be putted into tmp dir under library root.
+
+```sh
+thor ensure_it:benchmark:symbol -p # benchmark and profile #ensure_symbol
+thor ensure_it:benchmark:symbol --profile=/tmp/emsure_it
+```
+
+### number of examples
+`-n` or `--number`. By default, all benchmarking procs runs 10000 times. You can specify another value with this option.
+
+```sh
+thor ensure_it:benchmark:all -n 1000
+```
+
+### smart errors
+`-s` or `smart=true`. By default smart errors are off for time consuming. You can turn it on by this option.
+
+```sh
+thor ensure_it:benchmark:all -n 1000 -s
+```
+
 ## Changelog
 
 `0.1.2`
 * smart errors refactored
+* added: benchmarking
 
 `0.1.1`
 * fixed: no error_class in standard errors mode
@@ -303,8 +356,9 @@ Please read carefully [refinements](http://www.ruby-doc.org/core-2.1.1/doc/synta
 * enlarge method set
 * enlarge number of options for arrays and hashes
 * block processing for arrays and hashes
-* benchmarking and profiling
+* rspec matchers
 * custom extending functionality support
+* profile distribution
 
 ## Contributing
 
