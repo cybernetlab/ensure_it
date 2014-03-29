@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class Tester
-  using EnsureIt if ENSURE_IT_REFINES
+  using EnsureIt if ENSURE_IT_REFINED
 
   def ensure_integer(*args)
     obj.ensure_integer(*args)
@@ -75,6 +75,8 @@ describe EnsureIt do
       '123test', :test123, :'100',
       except: [String, Symbol, Integer, Float, Rational]
     )
+    it_behaves_like 'values checker', 10, 23, values: [10, 11, 12]
+    it_behaves_like 'values checker', 10.3, 12.6, values: [10, 11, 12]
   end
 
   describe '#ensure_integer!' do

@@ -5,24 +5,54 @@
 
 # EnsureIt
 
-This library provides way to check and converts local variables for every-method usage, like arguments checking.
+This library provides way to check and convert local variables for every-method usage, like arguments checking.
 
 The main goal of EnsureIt is to provide as fast executed code as it possible with simple and usable syntax.
 
 > **Note:** this library doesn't support ruby older than `2.0.0`
+
+The simplest example, that you can find at `examples/symbol.rb`:
+
+```ruby
+require 'rubygems'
+require 'bundler/setup'
+require 'ensure_it'
+
+def test(arg)
+  arg.ensure_symbol!
+end
+
+puts test(:symbol).inspect
+puts test('string').inspect
+puts test(0).inspect
+```
+
+gives following output:
+
+```
+$ ruby examples/symbol.rb
+:symbol
+:string
+examples/symbol.rb:6:in `test': argument 'arg' of 'test' method should be a Symbol or a String (EnsureIt::Error)
+  from examples/symbol.rb:11:in `<main>'
+```
+
+At first, string converted to symbol.
+
+Secondary, note on error message. The library magically recognizes that `ensure_symbol!` called for `arg` argument of `test` method.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-  gem 'ensure_it'
+gem 'ensure_it'
 ```
 
 or for [refinements](#refinements) version:
 
 ```ruby
-  gem 'ensure_it', require: 'ensure_it_refines'
+gem 'ensure_it', require: 'ensure_it_refined'
 ```
 
 And then execute:
@@ -94,6 +124,10 @@ Returns self for Symbol, converted value for String, nil (or raise) for other:
 :test.ensure_symbol # => :test
 'test'.ensure_symbol # => :test
 100.ensure_symbol # => nil
+:test.esnure_symbol(values: %i(one two)) # => nil
+:one.esnure_symbol(values: %i(one two)) # => :one
+'test'.esnure_symbol(values: %i(one two)) # => nil
+'one'.esnure_symbol(values: %i(one two)) # => :one
 ```
 
 ### ensure_string, ensure_string!
@@ -153,7 +187,7 @@ By default, returns Array only for Array itself and **empty** array (not nil) fo
 ```ruby
 [1, nil, 2].ensure_array # => [1, nil, 2]
 true.ensure_array # => []
-true.ensure_array(wrong: nil) # => nil
+true.ensure_array(default: nil) # => nil
 [1, nil, 2].ensure_array(compact: true) # => [1, 2]
 [1, [2, 3], 4].ensure_array(flatten: true) # => [1, 2, 3, 4]
 [1, [5, 6], 4].ensure_array(flatten: true, sorted: true) # => [1, 4, 5, 6]
@@ -224,11 +258,17 @@ Array.ensure_class(Enumerable, CustomModule) # => nil
 Array.ensure_class(Enumerable) # => Array
 ```
 
+### Common options for all methods
+
+|option|possible values|meaning|
+|------|---------------|-------|
+|`:values`|Array|(not used in `ensure_instance_of` and `ensure_hash`) an array of possible values. If value doesn't included in this array, default value returned or exception raised for bang methods. Note that library doesn't check types of this array elements, so be sure to specify array with right elements here.
+
 ### Common options for all non-bang methods
 
 |option|possible values|meaning|
 |------|---------------|-------|
-|`:wrong`|any|if present then will be used as wrong value instead of default `nil`|
+|`:default`|any|if present then will be used as wrong value|
 
 ### Common options for all bang methods
 
@@ -242,23 +282,23 @@ Array.ensure_class(Enumerable) # => Array
 
 Since ruby `2.0.0` [refinements](http://www.ruby-doc.org/core-2.1.1/doc/syntax/refinements_rdoc.html) mechanism intorduced and was experimental till `2.1.0`. Starting from `2.1.0` you can use it without warnings and in module and class scope.
 
-EnsureIt is fully tested and working with refinements. But not by default and not for ruby `< 2.1.0`. To use refined version of EnsureIt (with zero-monkey-pathing) just require `ensure_it_refines` instead of `ensure_it`. If you use bundler, you can do it, by specifying `require: 'ensure_it_refines'` option for `gem 'ensure_it'` in your `Gemfile`:
+EnsureIt is fully tested and working with refinements. But not by default and not for ruby `< 2.1.0`. To use refined version of EnsureIt (with zero-monkey-pathing) just require `ensure_it_refined` instead of `ensure_it`. If you use bundler, you can do it, by specifying `require: 'ensure_it_refined'` option for `gem 'ensure_it'` in your `Gemfile`:
 
 ```ruby
-gem 'ensure_it', require: 'ensure_it_refines'
+gem 'ensure_it', require: 'ensure_it_refined'
 ```
 
 Or without bundler:
 
 ```ruby
 # In you code initialization
-require 'ensure_it_refines'
+require 'ensure_it_refined'
 ```
 
 Then activate EnsureIt refines by `using EnsureIt` in needed scope:
 
 ```ruby
-require 'ensure_it_refines'
+require 'ensure_it_refined'
 
 class AwesomeClass
   using EnsureIt
@@ -292,13 +332,13 @@ Some results on my machine:
 ```
 $ thor ensure_it:benchmark:symbol
 Starting benchmarks for #ensure_symbol  with monkey-patched version of EnsureIt. Errors: standard. Ruby version: 2.1.1
-ensure_it:      0.070000   0.000000   0.070000 (  0.071321)
-standard way:   0.060000   0.000000   0.060000 (  0.052894)
+ensure_it:      0.090000   0.000000   0.090000 (  0.083292)
+standard way:   0.050000   0.000000   0.050000 (  0.051999)
 
 $ thor ensure_it:benchmark:symbol!
 Starting benchmarks for #ensure_symbol!  with monkey-patched version of EnsureIt. Errors: standard. Ruby version: 2.1.1
-ensure_it:      6.110000   0.010000   6.120000 (  6.498998)
-standard way:   0.430000   0.000000   0.430000 (  0.448031)
+ensure_it:      6.350000   0.000000   6.350000 (  6.431325)
+standard way:   0.440000   0.000000   0.440000 (  0.435714)
 ```
 
 As you can see, call to `#esnure_symbol` is very close to standard type checking (number of benchmark runs - 10000), but bang version consumes much more time. This because we need to do some job to grab information from code for error message. And, of course, this code will execute only when error occured. Call to bang method for expected values (Symbols and Strings in this case) consume same time, as for normal `#ensure_symbol`.
@@ -331,7 +371,11 @@ thor ensure_it:benchmark:all -n 1000 -s
 
 `0.1.2`
 * smart errors refactored
-* added: benchmarking
+* benchmarking added
+* `wrong` option changed to `default`
+* `values` option added
+* a lot of code refactored
+* `ensure_it_refines` changed to `ensure_it_refined`
 
 `0.1.1`
 * fixed: no error_class in standard errors mode
@@ -353,16 +397,19 @@ thor ensure_it:benchmark:all -n 1000 -s
 
 ## Todo
 
-* enlarge method set
+* class from string converting for ensure_class
+* ensure_file_name
+* ensure_var_name
 * enlarge number of options for arrays and hashes
 * block processing for arrays and hashes
 * rspec matchers
+* ActiveSupport and MongoId integration
 * custom extending functionality support
-* profile distribution
+* profiling distribution
 
 ## Contributing
 
-1. Fork it ( http://github.com/<my-github-username>/skeleton/fork )
+1. Fork it (http://github.com/cybernetlab/ensure_it/fork)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)

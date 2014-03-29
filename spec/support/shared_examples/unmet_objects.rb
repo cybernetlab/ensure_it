@@ -24,6 +24,14 @@ shared_examples 'niller for unmet objects' do |*add, except: []|
       compose_objects(add, except).map { |x| call_for(x) }.compact
     ).to be_empty
   end
+
+  it 'returns default value' do
+    objects = compose_objects(add, except)
+    default = Object.new
+    expect(
+      objects.map { |x| call_for(x, default: default) }
+    ).to match_array [default] * objects.size
+  end
 end
 
 shared_examples 'empty array creator for unmet objects' do |*add, except: []|
@@ -54,5 +62,17 @@ shared_examples 'banger for unmet objects' do |*add, except: [], **opts|
         call_for(obj)
       }.to raise_error(*err)
     end
+  end
+end
+
+shared_examples 'values checker' do |obj, unmet, values: []|
+  it 'returns value if it in values option' do
+    default = Object.new
+    expect(call_for(obj, values: values, default: default)).to_not eq default
+  end
+
+  it 'returns default if it not in values option' do
+    default = Object.new
+    expect(call_for(unmet, values: values, default: default)).to eq default
   end
 end

@@ -1,17 +1,16 @@
 module EnsureIt
   patch Object do
-    def ensure_instance_of(klass, **opts)
+    def ensure_instance_of(klass, default: nil, **opts)
       unless klass.is_a?(Class)
         fail(
           ArgumentError,
           'Wrong class argument for #ensure_instance_of specified'
         )
       end
-      return self if is_a?(klass)
-      opts.key?(:wrong) ? opts[:wrong] : nil
+      is_a?(klass) ? self : default
     end
 
-    def ensure_instance_of!(klass, **opts)
+    def ensure_instance_of!(klass, default: nil, **opts)
       unless klass.is_a?(Class)
         fail(
           ArgumentError,

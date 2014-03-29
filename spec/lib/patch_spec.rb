@@ -17,7 +17,7 @@ describe EnsureIt do
         end
       end)
       result =
-        if ENSURE_IT_REFINES
+        if ENSURE_IT_REFINED
           PatchTestWrapper.module_eval do
             using EnsureIt
             PatchTestClass.new.test_method

@@ -1,5 +1,5 @@
 module EnsureIt
-  if ENSURE_IT_REFINES
+  if ENSURE_IT_REFINED
     def self.patch(target, &block)
       module_eval do
         refine target do

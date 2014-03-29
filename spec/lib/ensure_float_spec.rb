@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class Tester
-  using EnsureIt if ENSURE_IT_REFINES
+  using EnsureIt if ENSURE_IT_REFINED
 
   def ensure_float(*args)
     obj.ensure_float(*args)
@@ -51,6 +51,8 @@ describe EnsureIt do
       '123test', :test123, :'0.1',
       except: [String, Integer, Float, Rational]
     )
+    it_behaves_like 'values checker', 10.0, 23.5, values: [10.0, 11.0, 12.0]
+    it_behaves_like 'values checker', 10, 23, values: [10.0, 11.0, 12.0]
   end
 
   describe '#ensure_float!' do

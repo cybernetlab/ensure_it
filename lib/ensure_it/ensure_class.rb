@@ -1,26 +1,32 @@
 module EnsureIt
   patch Object do
-    def ensure_class(*args, **opts)
-      opts.key?(:wrong) ? opts[:wrong] : nil
+    def ensure_class(*args, default: nil, **opts)
+      default
     end
 
-    def ensure_class!(*args, **opts)
+    def ensure_class!(*args, default: nil, **opts)
       opts[:message] ||= '#{subject} should be a class'
       EnsureIt.raise_error(:ensure_class!, **opts)
     end
   end
 
   patch Class do
-    using EnsureIt if ENSURE_IT_REFINES
-
-    def ensure_class(*args, **opts)
+    def ensure_class(*args, default: nil, values: nil, **opts)
       args.select! { |x| x.is_a?(Module) }
-      args.all? { |x| self <= x } ? self : super(**opts)
+      return default unless args.all? { |x| self <= x }
+      if values.nil? || values.is_a?(Array) && values.include?(self)
+        self
+      else
+        default
+      end
     end
 
-    def ensure_class!(*args, **opts)
+    def ensure_class!(*args, default: nil, values: nil, **opts)
       args.select! { |x| x.is_a?(Module) }
-      return self if args.all? { |x| self <= x }
+      if args.all? { |x| self <= x } &&
+         (values.nil? || values.is_a?(Array) && values.include?(self))
+        return self
+      end
       args = args.map!(&:name).join(', ')
       opts[:message] ||=
         "\#{subject} should subclass or extend all of ['#{args}']"

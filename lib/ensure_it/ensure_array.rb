@@ -1,20 +1,20 @@
 module EnsureIt
   patch Object do
-    def ensure_array(*args, **opts)
-      opts.key?(:wrong) ? opts[:wrong] : []
+    def ensure_array(*args, default: [], **opts)
+      default
     end
 
-    def ensure_array!(*args, **opts)
+    def ensure_array!(*args, default: nil, **opts)
       opts[:message] ||= '#{subject} should be an Array'
       EnsureIt.raise_error(:ensure_array!, **opts)
     end
   end
 
   patch Array do
-    using EnsureIt if ENSURE_IT_REFINES
+    using EnsureIt if ENSURE_IT_REFINED
 
-    if ENSURE_IT_REFINES
-      def ensure_array(*args, **opts)
+    if ENSURE_IT_REFINED
+      def ensure_array(*args, values: nil, **opts)
         arr = self
         args.each do |arg|
           arg = arg.ensure_symbol || next
@@ -39,6 +39,7 @@ module EnsureIt
         return arr if opts.empty?
         arr = arr.map { |x| x } if arr == self
         arr.flatten! if opts[:flatten] == true
+        arr.select! { |x| values.include?(x) } if values.is_a?(Array)
         opts[:sorted] ||= opts.delete(:ordered) if opts.key?(:ordered)
         arr.sort! if opts.key?(:sorted)
         arr.reverse! if opts[:sorted].ensure_symbol == :desc
@@ -46,7 +47,7 @@ module EnsureIt
         arr
       end
     else
-      def ensure_array(*args, **opts)
+      def ensure_array(*args, values: nil, **opts)
         arr = self
         args.each do |arg|
           arg = arg.ensure_symbol || next
@@ -55,6 +56,7 @@ module EnsureIt
         return arr if opts.empty?
         arr = arr.map { |x| x } if arr == self
         arr.flatten! if opts[:flatten] == true
+        arr.select! { |x| values.include?(x) } if values.is_a?(Array)
         opts[:sorted] ||= opts.delete(:ordered) if opts.key?(:ordered)
         arr.sort! if opts.key?(:sorted)
         arr.reverse! if opts[:sorted].ensure_symbol == :desc

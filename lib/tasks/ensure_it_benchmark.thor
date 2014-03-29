@@ -1,7 +1,7 @@
 require 'benchmark'
 
 if ENV['USE_REFINES'] == 'true'
-  ENSURE_IT_REFINES = true
+  ENSURE_IT_REFINED = true
 end
 
 module EnsureIt
@@ -46,16 +46,88 @@ module EnsureIt
       end
     end
 
+    desc 'integer', 'runs benchmarks for ensure_integer'
+    def integer
+      run_benchmark :integer, ensure_proc: ->(x) { x.ensure_integer } do |x|
+        if x.is_a?(Integer)
+          x
+        elsif x.is_a?(Float) || x.is_a?(Rational)
+          x.round
+        elsif x.is_a?(String)
+          case x
+          when ::EnsureIt::INT_REGEXP then x.to_i
+          when ::EnsureIt::HEX_REGEXP then x[2..-1].to_i(16)
+          when ::EnsureIt::BIN_REGEXP then x[2..-1].to_i(2)
+          else nil
+          end
+        else
+          nil
+        end
+      end
+    end
+
+    desc 'integer!', 'runs benchmarks for ensure_integer!'
+    def integer!
+      run_benchmark :integer!, ensure_proc: ->(x) { x.ensure_integer! } do |x|
+        if x.is_a?(Integer)
+          x
+        elsif x.is_a?(Float) || x.is_a?(Rational)
+          x.round
+        elsif x.is_a?(String)
+          case x
+          when ::EnsureIt::INT_REGEXP then x.to_i
+          when ::EnsureIt::HEX_REGEXP then x[2..-1].to_i(16)
+          when ::EnsureIt::BIN_REGEXP then x[2..-1].to_i(2)
+          else raise ArgumentError
+          end
+        else
+          raise ArgumentError
+        end
+      end
+    end
+
+    desc 'float', 'runs benchmarks for ensure_float'
+    def float
+      run_benchmark :float, ensure_proc: ->(x) { x.ensure_float } do |x|
+        if x.is_a?(Float)
+          x
+        elsif x.is_a?(Numeric) ||
+              x.is_a?(String) && ::EnsureIt::FLOAT_REGEXP =~ x
+          x.to_f
+        else
+          nil
+        end
+      end
+    end
+
+    desc 'float!', 'runs benchmarks for ensure_float!'
+    def float!
+      run_benchmark :float!, ensure_proc: ->(x) { x.ensure_float! } do |x|
+        if x.is_a?(Float)
+          x
+        elsif x.is_a?(Numeric) ||
+              x.is_a?(String) && ::EnsureIt::FLOAT_REGEXP =~ x
+          x.to_f
+        else
+          raise ArgumentError
+        end
+      end
+    end
+
     desc 'non_bang', 'runs all non-bang benchmarks'
     def non_bang
       invoke(:symbol)
       invoke(:string)
+      invoke(:integer)
+      invoke(:float)
     end
 
     desc 'bang', 'runs all bang benchmarks'
     def bang
       invoke(:symbol!)
       invoke(:string!)
+      invoke(:integer!)
+      invoke(:float!)
     end
 
     desc 'all', 'runs all benchmarks'
@@ -91,7 +163,7 @@ module EnsureIt
 
       def start_task(task_name)
         text = "Starting benchmarks for #ensure_#{task_name} "
-        if ENSURE_IT_REFINES == true
+        if ENSURE_IT_REFINED == true
           text << ' with refined version of EnsureIt.'
         else
           text << ' with monkey-patched version of EnsureIt.'
@@ -160,7 +232,7 @@ module EnsureIt
       def load_ensure_it
         lib = File.expand_path(File.join('..', '..'), __FILE__)
         $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-        require(refined? ? 'ensure_it_refines' : 'ensure_it')
+        require(refined? ? 'ensure_it_refined' : 'ensure_it')
         ::EnsureIt.configure do |config|
           config.errors = errors
         end

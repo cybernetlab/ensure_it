@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class Tester
-  using EnsureIt if ENSURE_IT_REFINES
+  using EnsureIt if ENSURE_IT_REFINED
 
   def ensure_array(*args)
     obj.ensure_array(*args)
@@ -59,9 +59,9 @@ describe EnsureIt do
     it_behaves_like 'array parser'
     it_behaves_like 'empty array creator for unmet objects', except: Array
 
-    it 'and returns nil with wrong: nil option' do
-      expect(call_for(true, wrong: nil)).to be_nil
-      expect(call_for(true, wrong: 1)).to eq 1
+    it 'and returns nil with default: nil option' do
+      expect(call_for(true, default: nil)).to be_nil
+      expect(call_for(true, default: 1)).to eq 1
     end
   end
 

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class Tester
-  using EnsureIt if ENSURE_IT_REFINES
+  using EnsureIt if ENSURE_IT_REFINED
 
   def ensure_string(*args)
     obj.ensure_string(*args)
@@ -33,6 +33,8 @@ describe EnsureIt do
   describe '#ensure_string' do
     it_behaves_like 'stringifier'
     it_behaves_like 'niller for unmet objects', except: [String, Symbol]
+    it_behaves_like 'values checker', :one, :test, values: %w(one two)
+    it_behaves_like 'values checker', 'one', 'test', values: %w(one two)
   end
 
   describe '#ensure_string!' do

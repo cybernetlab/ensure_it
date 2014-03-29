@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class Tester
-  using EnsureIt if ENSURE_IT_REFINES
+  using EnsureIt if ENSURE_IT_REFINED
 
   def ensure_instance_of(*args)
     obj.ensure_instance_of(*args)
@@ -32,8 +32,8 @@ describe EnsureIt do
       expect(call_for('test', Symbol)).to be_nil
     end
 
-    it 'returns wrong option for wrong instances' do
-      expect(call_for(:test, String, wrong: 1)).to eq 1
+    it 'returns default option for wrong instances' do
+      expect(call_for(:test, String, default: 1)).to eq 1
     end
   end
 

@@ -2,7 +2,7 @@ if RUBY_VERSION < '2.0.0'
   fail %q{EnsureIt: library doesn't support ruby < 2.0.0}
 end
 
-defined?(ENSURE_IT_REFINES) || ENSURE_IT_REFINES = false
+defined?(ENSURE_IT_REFINED) || ENSURE_IT_REFINED = false
 
 require File.join %w(ensure_it version)
 require File.join %w(ensure_it config)

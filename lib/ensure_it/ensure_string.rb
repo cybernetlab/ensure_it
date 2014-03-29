@@ -1,44 +1,92 @@
 module EnsureIt
   patch Object do
-    def ensure_string(**opts)
-      return nil if opts.empty?
-      opts.key?(:wrong) ? opts[:wrong] : nil
+    def ensure_string(default: nil, **opts)
+      default
     end
 
-    def ensure_string!(**opts)
-      opts[:message] ||=
+    def ensure_string!(default: nil, **opts)
+      EnsureIt.raise_error(
+        :ensure_string!,
+        **EnsureIt.ensure_string_error_options(**opts)
+      )
+    end
+  end
+
+  patch String do
+    def ensure_string(default: nil, values: nil, **opts)
+      if values.nil? || values.is_a?(Array) && values.include?(self)
+        self
+      else
+        default
+      end
+    end
+
+    def ensure_string!(default: nil, values: nil, **opts)
+      if values.nil? || values.is_a?(Array) && values.include?(self)
+        return self
+      end
+      EnsureIt.raise_error(
+        :ensure_string!,
+        **EnsureIt.ensure_string_error_options(**opts)
+      )
+    end
+  end
+
+  patch Symbol do
+    def ensure_string(default: nil, values: nil, **opts)
+      if values.nil?
+        to_s
+      elsif values.is_a?(Array)
+        value = to_s
+        values.include?(value) ? value : default
+      else
+        default
+      end
+    end
+
+    def ensure_string!(default: nil, values: nil, **opts)
+      return to_s if values.nil?
+      if values.is_a?(Array)
+        value = to_s
+        return value if values.include?(value)
+      end
+      EnsureIt.raise_error(
+        :ensure_string!,
+        **EnsureIt.ensure_string_error_options(**opts)
+      )
+    end
+  end
+
+  patch Numeric do
+    using EnsureIt if ENSURE_IT_REFINED
+
+    def ensure_string(default: nil, values: nil, numbers: false, **opts)
+      return default if numbers != true
+      value = to_s
+      values.is_a?(Array) && !values.include?(value) ? default : value
+    end
+
+    def ensure_string!(default: nil, values: nil, numbers: false, **opts)
+      if numbers == true
+        value = to_s
+        return value if !values.is_a?(Array) || values.include?(value)
+      end
+      EnsureIt.raise_error(
+        :ensure_string!,
+        **EnsureIt.ensure_string_error_options(**opts)
+      )
+    end
+  end
+
+  def self.ensure_string_error_options(**opts)
+    unless opts.key?(opts[:message])
+      opts[:message] =
         if opts[:numbers] == true
           '#{subject} should be a String, Symbol, Numeric or Rational'
         else
           '#{subject} should be a String or a Symbol'
         end
-      EnsureIt.raise_error(:ensure_string!, **opts)
     end
-  end
-
-  patch String do
-    def ensure_string(**opts)
-      self
-    end
-    alias_method :ensure_string!, :ensure_string
-  end
-
-  patch Symbol do
-    def ensure_string(**opts)
-      to_s
-    end
-    alias_method :ensure_string!, :ensure_string
-  end
-
-  patch Numeric do
-    using EnsureIt if ENSURE_IT_REFINES
-
-    def ensure_string(**opts)
-      opts[:numbers] == true ? to_s : nil
-    end
-
-    def ensure_string!(**opts)
-      opts[:numbers] == true ? to_s : super(**opts)
-    end
+    opts
   end
 end

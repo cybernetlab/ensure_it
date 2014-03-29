@@ -1,5 +1,5 @@
 if ENV['USE_REFINES'] == 'true'
-  require 'ensure_it_refines'
+  require 'ensure_it_refined'
 else
   require 'ensure_it'
 end

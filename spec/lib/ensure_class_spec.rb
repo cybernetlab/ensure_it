@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class Tester
-  using EnsureIt if ENSURE_IT_REFINES
+  using EnsureIt if ENSURE_IT_REFINED
 
   def ensure_class(*args)
     obj.ensure_class(*args)
@@ -25,14 +25,15 @@ describe EnsureIt do
 
   describe '#ensure_class' do
     it_behaves_like 'class selector'
+    it_behaves_like 'values checker', Array, Integer, values: [Array]
 
     it 'returns nil for wrong classes' do
       expect(call_for(10)).to be_nil
       expect(call_for(Float, Integer)).to be_nil
     end
 
-    it 'returns wrong option for wrong classs' do
-      expect(call_for(10, wrong: true)).to be_true
+    it 'returns default option for wrong classs' do
+      expect(call_for(10, default: true)).to be_true
     end
   end
 
