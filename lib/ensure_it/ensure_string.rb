@@ -1,3 +1,16 @@
+# @!method ensure_it(opts = {})
+#
+# Ensures that subject is a symbol. For symbols return self, for strings,
+# value, converted to symbol, for others - value, specified in default option
+# or nil.
+#
+# @param [Hash] opts the options
+# @option opts [Object] :default (nil) default value for wrong subject
+# @option opts [Array] :values
+# @option opts [Boolean] :downcase
+# @option opts [<String, Symbol>] :name_of
+
+# @private
 module EnsureIt
   patch Object do
     def ensure_string(default: nil, **opts)

@@ -4,11 +4,16 @@ end
 
 defined?(ENSURE_IT_REFINED) || ENSURE_IT_REFINED = false
 
+module EnsureIt
+  module StringUtils
+    def self.ensure_name(*args); end
+  end
+end
+
 require File.join %w(ensure_it version)
 require File.join %w(ensure_it config)
 require File.join %w(ensure_it errors)
 require File.join %w(ensure_it patch)
-require File.join %w(ensure_it string_utils)
 require File.join %w(ensure_it ensure_symbol)
 require File.join %w(ensure_it ensure_string)
 require File.join %w(ensure_it ensure_integer)
@@ -17,3 +22,4 @@ require File.join %w(ensure_it ensure_array)
 require File.join %w(ensure_it ensure_hash)
 require File.join %w(ensure_it ensure_instance_of)
 require File.join %w(ensure_it ensure_class)
+require File.join %w(ensure_it string_utils)

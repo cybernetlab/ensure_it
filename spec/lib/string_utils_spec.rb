@@ -5,20 +5,22 @@ describe EnsureIt::StringUtils do
     NAMES = %w(local @inst_var @@class_var setter= getter checker?
                bang! Object)
 
-    it 'checks str argument' do
-      str = 'str'
-      expect(str).to receive(:ensure_string!).and_call_original
-      described_class.ensure_name(str)
-    end
+    if ENSURE_IT_REFINED != true
+      it 'checks str argument' do
+        str = 'str'
+        expect(str).to receive(:ensure_string!).and_call_original
+        described_class.ensure_name(str)
+      end
 
-    it 'checks name_of option' do
-      str = 'str'
-      expect(str).to receive(:ensure_symbol).with(
-        downcase: true,
-        values: EnsureIt::StringUtils::NAME_TYPES,
-        default: EnsureIt::StringUtils::NAME_TYPES[0]
-      ).and_call_original
-      described_class.ensure_name('str', name_of: str)
+      it 'checks name_of option' do
+        str = 'str'
+        expect(str).to receive(:ensure_symbol).with(
+          downcase: true,
+          values: EnsureIt::StringUtils::NAME_TYPES,
+          default: EnsureIt::StringUtils::NAME_TYPES[0]
+        ).and_call_original
+        described_class.ensure_name('str', name_of: str)
+      end
     end
 
     describe 'name_of: :class' do
