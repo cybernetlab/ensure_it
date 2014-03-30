@@ -28,6 +28,11 @@ describe EnsureIt do
       expect(call_for(0.5, numbers: true)).to eq '0.5'
       expect(call_for(Rational(2, 3), numbers: true)).to eq '2/3'
     end
+
+    it 'and downcases value with downcase option' do
+      expect(call_for(:teST, downcase: true)).to eq 'test'
+      expect(call_for('teST', downcase: true)).to eq 'test'
+    end
   end
 
   describe '#ensure_string' do

@@ -13,17 +13,19 @@ module EnsureIt
   end
 
   patch String do
-    def ensure_string(default: nil, values: nil, **opts)
-      if values.nil? || values.is_a?(Array) && values.include?(self)
-        self
+    def ensure_string(default: nil, values: nil, downcase: nil, **opts)
+      value = downcase == true ? self.downcase : self
+      if values.nil? || values.is_a?(Array) && values.include?(value)
+        value
       else
         default
       end
     end
 
-    def ensure_string!(default: nil, values: nil, **opts)
-      if values.nil? || values.is_a?(Array) && values.include?(self)
-        return self
+    def ensure_string!(default: nil, values: nil, downcase: nil, **opts)
+      value = downcase == true ? self.downcase : self
+      if values.nil? || values.is_a?(Array) && values.include?(value)
+        return value
       end
       EnsureIt.raise_error(
         :ensure_string!,
@@ -33,22 +35,19 @@ module EnsureIt
   end
 
   patch Symbol do
-    def ensure_string(default: nil, values: nil, **opts)
-      if values.nil?
-        to_s
-      elsif values.is_a?(Array)
-        value = to_s
-        values.include?(value) ? value : default
+    def ensure_string(default: nil, values: nil, downcase: nil, **opts)
+      value = downcase == true ? to_s.downcase : to_s
+      if values.nil? || values.is_a?(Array) && values.include?(value)
+        value
       else
         default
       end
     end
 
-    def ensure_string!(default: nil, values: nil, **opts)
-      return to_s if values.nil?
-      if values.is_a?(Array)
-        value = to_s
-        return value if values.include?(value)
+    def ensure_string!(default: nil, values: nil, downcase: nil, **opts)
+      value = downcase == true ? to_s.downcase : to_s
+      if values.nil? || values.is_a?(Array) && values.include?(value)
+        return value
       end
       EnsureIt.raise_error(
         :ensure_string!,

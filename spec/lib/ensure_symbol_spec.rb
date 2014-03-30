@@ -26,6 +26,11 @@ describe EnsureIt do
       expect(call_for(:test, values: %i(test me))).to eq :test
       expect(call_for('me', values: %i(test me))).to eq :me
     end
+
+    it 'and downcases value with downcase option' do
+      expect(call_for(:teST, downcase: true)).to eq :test
+      expect(call_for('teST', downcase: true)).to eq :test
+    end
   end
 
   describe '#ensure_symbol' do

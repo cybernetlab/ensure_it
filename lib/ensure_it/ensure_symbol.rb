@@ -13,22 +13,19 @@ module EnsureIt
   end
 
   patch String do
-    def ensure_symbol(default: nil, values: nil, **opts)
-      if values.nil?
-        to_sym
-      elsif values.is_a?(Array)
-        value = to_sym
-        values.include?(value) ? value : default
+    def ensure_symbol(default: nil, values: nil, downcase: nil, **opts)
+      value = downcase == true ? self.downcase.to_sym : to_sym
+      if values.nil? || values.is_a?(Array) && values.include?(value)
+        value
       else
         default
       end
     end
 
-    def ensure_symbol!(default: nil, values: nil, **opts)
-      return to_sym if values.nil?
-      if values.is_a?(Array)
-        value = to_sym
-        return value if values.include?(value)
+    def ensure_symbol!(default: nil, values: nil, downcase: nil, **opts)
+      value = downcase == true ? self.downcase.to_sym : to_sym
+      if values.nil? || values.is_a?(Array) && values.include?(value)
+        return value
       end
       EnsureIt.raise_error(
         :ensure_symbol!,
@@ -38,17 +35,19 @@ module EnsureIt
   end
 
   patch Symbol do
-    def ensure_symbol(default: nil, values: nil, **opts)
-      if values.nil? || values.is_a?(Array) && values.include?(self)
-        self
+    def ensure_symbol(default: nil, values: nil, downcase: nil, **opts)
+      value = downcase == true ? self.to_s.downcase.to_sym : self
+      if values.nil? || values.is_a?(Array) && values.include?(value)
+        value
       else
         default
       end
     end
 
-    def ensure_symbol!(default: nil, values: nil, **opts)
-      if values.nil? || values.is_a?(Array) && values.include?(self)
-        return self
+    def ensure_symbol!(default: nil, values: nil, downcase: nil, **opts)
+      value = downcase == true ? self.to_s.downcase.to_sym : self
+      if values.nil? || values.is_a?(Array) && values.include?(value)
+        return value
       end
       EnsureIt.raise_error(
         :ensure_symbol!,

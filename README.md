@@ -11,7 +11,7 @@ The main goal of EnsureIt is to provide as fast executed code as it possible wit
 
 > **Note:** this library doesn't support ruby older than `2.0.0`
 
-The simplest example, that you can find at `examples/symbol.rb`:
+Simplest example (you can find at `examples/symbol.rb`):
 
 ```ruby
 require 'rubygems'
@@ -128,6 +128,8 @@ Returns self for Symbol, converted value for String, nil (or raise) for other:
 :one.esnure_symbol(values: %i(one two)) # => :one
 'test'.esnure_symbol(values: %i(one two)) # => nil
 'one'.esnure_symbol(values: %i(one two)) # => :one
+:Test.ensure_symbol(downcase: true) # => :test
+'Test'.ensure_symbol(downcase: true) # => :test
 ```
 
 ### ensure_string, ensure_string!
@@ -139,6 +141,7 @@ By default, returns self for String, converted value for Symbol and nil (or rais
 'test'.ensure_string # => 'test'
 100.ensure_string # => nil
 100.ensure_string(numbers: true) # => '100'
+:Test.ensure_string(downcase: true) # => 'test'
 ```
 
 ### ensure_integer, ensure_integer!
@@ -369,6 +372,9 @@ thor ensure_it:benchmark:all -n 1000 -s
 
 ## Changelog
 
+`0.1.3`
+* downcase option added to `ensure_symbol` and `ensure_string`
+
 `0.1.2`
 * smart errors refactored
 * benchmarking added
@@ -406,6 +412,7 @@ thor ensure_it:benchmark:all -n 1000 -s
 * ActiveSupport and MongoId integration
 * custom extending functionality support
 * profiling distribution
+* documenting with yard
 
 ## Contributing
 
