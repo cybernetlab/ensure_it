@@ -13,18 +13,40 @@ module EnsureIt
   end
 
   patch String do
-    def ensure_symbol(default: nil, values: nil, downcase: nil, **opts)
-      value = downcase == true ? self.downcase.to_sym : to_sym
-      if values.nil? || values.is_a?(Array) && values.include?(value)
+    def ensure_symbol(default: nil,
+                      values: nil,
+                      downcase: nil,
+                      name_of: nil,
+                      **opts)
+      value = if name_of.nil?
+        downcase == true ? self.downcase.to_sym : to_sym
+      else
+        EnsureIt::StringUtils.ensure_name(
+          self, downcase: downcase, name_of: name_of, **opts
+        )
+      end
+      if !value.nil? &&
+         (values.nil? || values.is_a?(Array) && values.include?(value))
         value
       else
         default
       end
     end
 
-    def ensure_symbol!(default: nil, values: nil, downcase: nil, **opts)
-      value = downcase == true ? self.downcase.to_sym : to_sym
-      if values.nil? || values.is_a?(Array) && values.include?(value)
+    def ensure_symbol!(default: nil,
+                       values: nil,
+                       downcase: nil,
+                       name_of: nil,
+                       **opts)
+      value = if name_of.nil?
+        downcase == true ? self.downcase.to_sym : to_sym
+      else
+        EnsureIt::StringUtils.ensure_name(
+          self, downcase: downcase, name_of: name_of, **opts
+        )
+      end
+      if !value.nil? &&
+         (values.nil? || values.is_a?(Array) && values.include?(value))
         return value
       end
       EnsureIt.raise_error(
@@ -35,18 +57,42 @@ module EnsureIt
   end
 
   patch Symbol do
-    def ensure_symbol(default: nil, values: nil, downcase: nil, **opts)
-      value = downcase == true ? self.to_s.downcase.to_sym : self
-      if values.nil? || values.is_a?(Array) && values.include?(value)
+    def ensure_symbol(default: nil,
+                      values: nil,
+                      downcase: nil,
+                      name_of: nil,
+                      **opts)
+      if name_of.nil?
+        value = downcase == true ? self.to_s.downcase.to_sym : self
+      else
+        value = EnsureIt::StringUtils.ensure_name(
+          to_s, downcase: downcase, name_of: name_of, **opts
+        )
+        value = value.to_sym unless value.nil?
+      end
+      if !value.nil? &&
+         (values.nil? || values.is_a?(Array) && values.include?(value))
         value
       else
         default
       end
     end
 
-    def ensure_symbol!(default: nil, values: nil, downcase: nil, **opts)
-      value = downcase == true ? self.to_s.downcase.to_sym : self
-      if values.nil? || values.is_a?(Array) && values.include?(value)
+    def ensure_symbol!(default: nil,
+                       values: nil,
+                       downcase: nil,
+                       name_of: nil,
+                       **opts)
+      if name_of.nil?
+        value = downcase == true ? self.to_s.downcase.to_sym : self
+      else
+        value = EnsureIt::StringUtils.ensure_name(
+          to_s, downcase: downcase, name_of: name_of, **opts
+        )
+        value = value.to_sym unless value.nil?
+      end
+      if !value.nil? &&
+         (values.nil? || values.is_a?(Array) && values.include?(value))
         return value
       end
       EnsureIt.raise_error(

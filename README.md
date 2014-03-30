@@ -372,6 +372,10 @@ thor ensure_it:benchmark:all -n 1000 -s
 
 ## Changelog
 
+`0.1.4`
+* name_of option added to `ensure_symbol` and `ensure_string`
+* string options added to `ensure_class`
+
 `0.1.3`
 * downcase option added to `ensure_symbol` and `ensure_string`
 

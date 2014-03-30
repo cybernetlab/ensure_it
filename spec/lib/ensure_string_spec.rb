@@ -33,6 +33,13 @@ describe EnsureIt do
       expect(call_for(:teST, downcase: true)).to eq 'test'
       expect(call_for('teST', downcase: true)).to eq 'test'
     end
+
+    it 'and calls ensure_name with name_of option' do
+      expect(EnsureIt::StringUtils).to receive(:ensure_name).with(
+        'test', name_of: :setter, downcase: nil
+      ).and_call_original
+      expect(call_for('test', name_of: :setter)).to eq 'test='
+    end
   end
 
   describe '#ensure_string' do

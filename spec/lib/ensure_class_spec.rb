@@ -21,6 +21,10 @@ describe EnsureIt do
     it 'and checks for ancestors' do
       expect(call_for(Array, Enumerable, Array)).to eq Array
     end
+
+    it 'and converts string to class with string option' do
+      expect(call_for('Array', string: true)).to eq Array
+    end
   end
 
   describe '#ensure_class' do
