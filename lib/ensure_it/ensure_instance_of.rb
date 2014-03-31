@@ -10,7 +10,7 @@ module EnsureIt
       is_a?(klass) ? self : default
     end
 
-    def ensure_instance_of!(klass, default: nil, **opts)
+    def ensure_instance_of!(klass, **opts)
       unless klass.is_a?(Class)
         fail(
           ArgumentError,

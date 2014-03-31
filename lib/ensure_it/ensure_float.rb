@@ -6,96 +6,79 @@ module EnsureIt
       default
     end
 
-    def ensure_float!(default: nil, **opts)
-      EnsureIt.raise_error(
-        :ensure_float!,
-        **EnsureIt::ensure_float_error_options(**opts)
-      )
+    def ensure_float!(**opts)
+      EnsureIt.raise_error(:ensure_float!,
+                           **EnsureIt::ensure_float_error(**opts))
     end
   end
 
   patch String do
-    def ensure_float(default: nil, values: nil, **opts)
+    def ensure_float(default: nil, **opts)
       return default unless self =~ FLOAT_REGEXP
-      value = to_f
-      if values.nil? || values.is_a?(Array) && values.include?(value)
-        value
-      else
-        default
-      end
+      catch(:wrong) { return EnsureIt.ensure_float(to_f, **opts) }
+      default
     end
 
-    def ensure_float!(default: nil, values: nil, **opts)
+    def ensure_float!(**opts)
       if self =~ FLOAT_REGEXP
-        value = to_f
-        if values.nil? || values.is_a?(Array) && values.include?(value)
-          return value
-        end
+        catch(:wrong) { return EnsureIt.ensure_float(to_f, **opts) }
       end
-      EnsureIt.raise_error(
-        :ensure_float!,
-        **EnsureIt::ensure_float_error_options(**opts)
-      )
+      EnsureIt.raise_error(:ensure_float!,
+                           **EnsureIt::ensure_float_error(**opts))
     end
   end
 
   patch Integer do
-    def ensure_float(default: nil, values: nil, **opts)
-      return to_f if values.nil?
-      value = to_f
-      values.is_a?(Array) && values.include?(value) ? value : default
+    def ensure_float(default: nil, **opts)
+      return to_f if opts.nil?
+      catch(:wrong) { return EnsureIt.ensure_float(to_f, **opts) }
+      default
     end
 
-    def ensure_float!(default: nil, values: nil, **opts)
-      return to_f if values.nil?
-      value = to_f
-      return values if values.is_a?(Array) && values.include?(value)
-      EnsureIt.raise_error(
-        :ensure_float!,
-        **EnsureIt::ensure_float_error_options(**opts)
-      )
+    def ensure_float!(**opts)
+      return to_f if opts.nil?
+      catch(:wrong) { return EnsureIt.ensure_float(to_f, **opts) }
+      EnsureIt.raise_error(:ensure_float!,
+                           **EnsureIt::ensure_float_error(**opts))
     end
   end
 
   patch Float do
-    def ensure_float(default: nil, values: nil, **opts)
-      if values.nil? || values.is_a?(Array) && values.include?(self)
-        self
-      else
-        default
-      end
+    def ensure_float(default: nil, **opts)
+      return self if opts.nil?
+      catch(:wrong) { return EnsureIt.ensure_float(self, **opts) }
+      default
     end
 
-    def ensure_float!(default: nil, values: nil, **opts)
-      if values.nil? || values.is_a?(Array) && values.include?(self)
-        return self
-      end
-      EnsureIt.raise_error(
-        :ensure_float!,
-        **EnsureIt::ensure_float_error_options(**opts)
-      )
+    def ensure_float!(**opts)
+      return self if opts.nil?
+      catch(:wrong) { return EnsureIt.ensure_float(self, **opts) }
+      EnsureIt.raise_error(:ensure_float!,
+                           **EnsureIt::ensure_float_error(**opts))
     end
   end
 
   patch Rational do
-    def ensure_float(default: nil, values: nil, **opts)
-      return to_f if values.nil?
-      value = to_f
-      values.is_a?(Array) && values.include?(value) ? value : default
+    def ensure_float(default: nil, **opts)
+      return to_f if opts.nil?
+      catch(:wrong) { return EnsureIt.ensure_float(to_f, **opts) }
+      default
     end
 
-    def ensure_float!(default: nil, values: nil, **opts)
-      return to_f if values.nil?
-      value = to_f
-      return values if values.is_a?(Array) && values.include?(value)
-      EnsureIt.raise_error(
-        :ensure_float!,
-        **EnsureIt::ensure_float_error_options(**opts)
-      )
+    def ensure_float!(**opts)
+      return to_f if opts.nil?
+      catch(:wrong) { return EnsureIt.ensure_float(to_f, **opts) }
+      EnsureIt.raise_error(:ensure_float!,
+                           **EnsureIt::ensure_float_error(**opts))
     end
   end
 
-  def self.ensure_float_error_options(**opts)
+  def self.ensure_float(float, values: nil, **opts)
+    throw :wrong if values.is_a?(Array) && !values.include?(float)
+    float
+  end
+
+  def self.ensure_float_error(**opts)
     unless opts.key?(:message)
       opts[:message] = '#{subject} should be a float or be able' \
                        ' to convert to it'

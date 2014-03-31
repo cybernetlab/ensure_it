@@ -4,7 +4,7 @@ module EnsureIt
       default
     end
 
-    def ensure_hash!(*args, default: nil, **opts)
+    def ensure_hash!(*args, **opts)
       opts[:message] ||= '#{subject} should be a Hash'
       EnsureIt.raise_error(:ensure_hash!, **opts)
     end
@@ -13,7 +13,7 @@ module EnsureIt
   patch Hash do
     using EnsureIt if ENSURE_IT_REFINED
 
-    def ensure_hash(*args, **opts)
+    def ensure_hash(*args, default: {}, **opts)
       return self if opts.empty? || opts[:symbolize_keys] != true
       Hash[map { |k, v| [k.ensure_symbol, v] }.reject { |x| x[0].nil? }]
     end

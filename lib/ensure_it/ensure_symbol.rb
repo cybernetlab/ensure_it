@@ -4,112 +4,73 @@ module EnsureIt
       default
     end
 
-    def ensure_symbol!(default: nil, **opts)
-      EnsureIt.raise_error(
-        :ensure_symbol!,
-        **EnsureIt.ensure_symbol_error_options(**opts)
-      )
+    def ensure_symbol!(**opts)
+      EnsureIt.raise_error(:ensure_symbol!,
+                           **EnsureIt.ensure_symbol_error(**opts))
     end
   end
 
   patch String do
-    def ensure_symbol(default: nil,
-                      values: nil,
-                      downcase: nil,
-                      name_of: nil,
-                      **opts)
-      value = if name_of.nil?
-        downcase == true ? self.downcase.to_sym : to_sym
-      else
-        EnsureIt::StringUtils.ensure_name(
-          self, downcase: downcase, name_of: name_of, **opts
-        )
+    def ensure_symbol(default: nil, **opts)
+      return to_sym if opts.empty?
+      catch :wrong do
+        return EnsureIt.ensure_symbol(to_sym, **opts)
       end
-      if !value.nil? &&
-         (values.nil? || values.is_a?(Array) && values.include?(value))
-        value
-      else
-        default
-      end
+      default
     end
 
-    def ensure_symbol!(default: nil,
-                       values: nil,
-                       downcase: nil,
-                       name_of: nil,
-                       **opts)
-      value = if name_of.nil?
-        downcase == true ? self.downcase.to_sym : to_sym
-      else
-        EnsureIt::StringUtils.ensure_name(
-          self, downcase: downcase, name_of: name_of, **opts
-        )
+    def ensure_symbol!(**opts)
+      return to_sym if opts.empty?
+      catch :wrong do
+        return EnsureIt.ensure_symbol(to_sym, **opts)
       end
-      if !value.nil? &&
-         (values.nil? || values.is_a?(Array) && values.include?(value))
-        return value
-      end
-      EnsureIt.raise_error(
-        :ensure_symbol!,
-        **EnsureIt.ensure_symbol_error_options(**opts)
-      )
+      EnsureIt.raise_error(:ensure_symbol!,
+                           **EnsureIt.ensure_symbol_error(**opts))
     end
   end
 
   patch Symbol do
-    def ensure_symbol(default: nil,
-                      values: nil,
-                      downcase: nil,
-                      name_of: nil,
-                      **opts)
-      if name_of.nil?
-        value = downcase == true ? self.to_s.downcase.to_sym : self
-      else
-        value = EnsureIt::StringUtils.ensure_name(
-          to_s, downcase: downcase, name_of: name_of, **opts
-        )
-        value = value.to_sym unless value.nil?
+    def ensure_symbol(default: nil, **opts)
+      return self if opts.empty?
+      catch :wrong do
+        return EnsureIt.ensure_symbol(self, **opts)
       end
-      if !value.nil? &&
-         (values.nil? || values.is_a?(Array) && values.include?(value))
-        value
-      else
-        default
-      end
+      default
     end
 
-    def ensure_symbol!(default: nil,
-                       values: nil,
-                       downcase: nil,
-                       name_of: nil,
-                       **opts)
-      if name_of.nil?
-        value = downcase == true ? self.to_s.downcase.to_sym : self
-      else
-        value = EnsureIt::StringUtils.ensure_name(
-          to_s, downcase: downcase, name_of: name_of, **opts
-        )
-        value = value.to_sym unless value.nil?
+    def ensure_symbol!(default: nil, **opts)
+      return self if opts.empty?
+      catch :wrong do
+        return EnsureIt.ensure_symbol(self, **opts)
       end
-      if !value.nil? &&
-         (values.nil? || values.is_a?(Array) && values.include?(value))
-        return value
-      end
-      EnsureIt.raise_error(
-        :ensure_symbol!,
-        **EnsureIt.ensure_symbol_error_options(**opts)
-      )
+      EnsureIt.raise_error(:ensure_symbol!,
+                           **EnsureIt.ensure_symbol_error(**opts))
     end
   end
 
-  def self.ensure_symbol_error_options(**opts)
-    unless opts.key?(opts[:message])
-      opts[:message] = '#{subject} should be' +
-        if opts[:values].is_a?(Array)
-          " one of #{opts[:values]}"
-        else
-          ' a Symbol or a String'
-        end
+  def self.ensure_symbol(sym, values: nil, downcase: nil, name_of: nil, **opts)
+    if name_of.nil?
+      value = downcase == true ? sym.to_s.downcase.to_sym : sym
+    else
+      value = EnsureIt::StringUtils.ensure_name(
+        sym.to_s, downcase: downcase, name_of: name_of, **opts
+      )
+      throw :wrong if value.nil?
+      value = value.to_sym
+    end
+    throw :wrong if values.is_a?(Array) && !values.include?(value)
+    value
+  end
+
+  def self.ensure_symbol_error(**opts)
+    unless opts.key?(:message)
+      opts[:message] = '#{subject} should be a Symbol or a String'
+      if opts.key?(:name_of)
+        opts[:message] << " and should be a name of #{opts[:name_of]}"
+      end
+      if opts[:values].is_a?(Array)
+        opts[:message] << " and should contained in #{opts[:values]}"
+      end
     end
     opts
   end

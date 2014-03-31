@@ -4,29 +4,22 @@ module EnsureIt
       default
     end
 
-    def ensure_class!(*args, default: nil, **opts)
+    def ensure_class!(*args, **opts)
       opts[:message] ||= '#{subject} should be a class'
       EnsureIt.raise_error(:ensure_class!, **opts)
     end
   end
 
   patch Class do
-    def ensure_class(*args, default: nil, values: nil, **opts)
-      args.select! { |x| x.is_a?(Module) }
-      return default unless args.all? { |x| self <= x }
-      if values.nil? || values.is_a?(Array) && values.include?(self)
-        self
-      else
-        default
-      end
+    def ensure_class(*args, default: nil, **opts)
+      return self if args.empty? && opts.empty?
+      catch(:wrong) { return EnsureIt.ensure_class(self, *args, **opts) }
+      default
     end
 
-    def ensure_class!(*args, default: nil, values: nil, **opts)
-      args.select! { |x| x.is_a?(Module) }
-      if args.all? { |x| self <= x } &&
-         (values.nil? || values.is_a?(Array) && values.include?(self))
-        return self
-      end
+    def ensure_class!(*args, **opts)
+      return self if args.empty? && opts.empty?
+      catch(:wrong) { return EnsureIt.ensure_class(self, *args, **opts) }
       args = args.map!(&:name).join(', ')
       opts[:message] ||=
         "\#{subject} should subclass or extend all of ['#{args}']"
@@ -37,32 +30,18 @@ module EnsureIt
   patch String do
     using EnsureIt if ENSURE_IT_REFINED
 
-    def ensure_class(*args, default: nil, values: nil, string: nil, **opts)
+    def ensure_class(*args, default: nil, string: nil, **opts)
       return default if string != true
-      opts.delete(:name_of)
-      opts.delete(:exist)
-      name = EnsureIt::StringUtils.ensure_name(
-        self, name_of: :class, exist: true, **opts
-      )
-      return default if name.nil?
-      Object.const_get(name)
-            .ensure_class(*args, default: default, values: values)
+      catch :wrong do
+        return EnsureIt.ensure_class_string(self, *args, **opts)
+      end
+      default
     end
 
-    def ensure_class!(*args, default: nil, values: nil, string: nil, **opts)
+    def ensure_class!(*args, string: nil, **opts)
       if string == true
-        opts.delete(:name_of)
-        opts.delete(:exist)
-        name = EnsureIt::StringUtils.ensure_name(
-          self, name_of: :class, exist: true, **opts
-        )
-        unless name.nil?
-          klass = Object.const_get(name)
-          args.select! { |x| x.is_a?(Module) }
-          if args.all? { |x| klass <= x } &&
-             (values.nil? || values.is_a?(Array) && values.include?(klass))
-            return klass
-          end
+        catch :wrong do
+          return EnsureIt.ensure_class_string(self, *args, **opts)
         end
       end
       args = args.map!(&:name).join(', ')
@@ -73,5 +52,22 @@ module EnsureIt
       end
       EnsureIt.raise_error(:ensure_class!, **opts)
     end
+  end
+
+  def self.ensure_class_string(str, *args, **opts)
+    opts.delete(:name_of)
+    opts.delete(:exist)
+    name = EnsureIt::StringUtils.ensure_name(
+      str, name_of: :class, exist: true, **opts
+    )
+    throw :wrong if name.nil?
+    EnsureIt.ensure_class(Object.const_get(name), *args, **opts)
+  end
+
+  def self.ensure_class(klass, *args, values: nil, **opts)
+    args.select! { |x| x.is_a?(Module) }
+    throw :wrong unless args.all? { |x| klass <= x }
+    throw :wrong if values.is_a?(Array) && !values.include?(klass)
+    klass
   end
 end

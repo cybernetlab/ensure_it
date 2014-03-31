@@ -58,133 +58,99 @@ module EnsureIt
       default
     end
 
-    def ensure_string!(default: nil, **opts)
-      EnsureIt.raise_error(
-        :ensure_string!,
-        **EnsureIt.ensure_string_error_options(**opts)
-      )
+    def ensure_string!(**opts)
+      EnsureIt.raise_error(:ensure_string!,
+                           **EnsureIt.ensure_string_error(**opts))
     end
   end
 
   patch String do
-    def ensure_string(default: nil,
-                      values: nil,
-                      downcase: nil,
-                      name_of: nil,
-                      **opts)
-      value = if name_of.nil?
-        downcase == true ? self.downcase : self
-      else
-        EnsureIt::StringUtils.ensure_name(
-          self, downcase: downcase, name_of: name_of, **opts
-        )
+    def ensure_string(default: nil, **opts)
+      return self if opts.empty?
+      catch :wrong do
+        return EnsureIt.ensure_string(self, **opts)
       end
-      if !value.nil? &&
-         (values.nil? || values.is_a?(Array) && values.include?(value))
-        value
-      else
-        default
-      end
+      default
     end
 
-    def ensure_string!(default: nil,
-                       values: nil,
-                       downcase: nil,
-                       name_of: nil,
-                       **opts)
-      value = if name_of.nil?
-        downcase == true ? self.downcase : self
-      else
-        EnsureIt::StringUtils.ensure_name(
-          self, downcase: downcase, name_of: name_of, **opts
-        )
+    def ensure_string!(**opts)
+      return self if opts.empty?
+      catch :wrong do
+        return EnsureIt.ensure_string(self, **opts)
       end
-      if !value.nil? &&
-         (values.nil? || values.is_a?(Array) && values.include?(value))
-        return value
-      end
-      EnsureIt.raise_error(
-        :ensure_string!,
-        **EnsureIt.ensure_string_error_options(**opts)
-      )
+      EnsureIt.raise_error(:ensure_string!,
+                           **EnsureIt.ensure_string_error(**opts))
     end
   end
 
   patch Symbol do
-    def ensure_string(default: nil,
-                      values: nil,
-                      downcase: nil,
-                      name_of: nil,
-                      **opts)
-      if name_of.nil?
-        value = downcase == true ? to_s.downcase : to_s
-      else
-        value = EnsureIt::StringUtils.ensure_name(
-          to_s, downcase: downcase, name_of: name_of, **opts
-        )
-        value = value.to_sym unless value.nil?
+    def ensure_string(default: nil, **opts)
+      return to_s if opts.empty?
+      catch :wrong do
+        return EnsureIt.ensure_string(to_s, **opts)
       end
-      if !value.nil? &&
-         (values.nil? || values.is_a?(Array) && values.include?(value))
-        value
-      else
-        default
-      end
+      default
     end
 
-    def ensure_string!(default: nil,
-                       values: nil,
-                       downcase: nil,
-                       name_of: nil,
-                       **opts)
-      if name_of.nil?
-        value = downcase == true ? to_s.downcase : to_s
-      else
-        value = EnsureIt::StringUtils.ensure_name(
-          to_s, downcase: downcase, name_of: name_of, **opts
-        )
-        value = value.to_sym unless value.nil?
+    def ensure_string!(**opts)
+      return to_s if opts.empty?
+      catch :wrong do
+        return EnsureIt.ensure_string(to_s, **opts)
       end
-      if !value.nil? &&
-         (values.nil? || values.is_a?(Array) && values.include?(value))
-        return value
-      end
-      EnsureIt.raise_error(
-        :ensure_string!,
-        **EnsureIt.ensure_string_error_options(**opts)
-      )
+      EnsureIt.raise_error(:ensure_string!,
+                           **EnsureIt.ensure_string_error(**opts))
     end
   end
 
   patch Numeric do
     using EnsureIt if ENSURE_IT_REFINED
 
-    def ensure_string(default: nil, values: nil, numbers: false, **opts)
+    def ensure_string(default: nil, numbers: false, **opts)
       return default if numbers != true
-      value = to_s
-      values.is_a?(Array) && !values.include?(value) ? default : value
+      catch :wrong do
+        return EnsureIt.ensure_string(to_s, **opts)
+      end
+      default
     end
 
-    def ensure_string!(default: nil, values: nil, numbers: false, **opts)
+    def ensure_string!(numbers: false, **opts)
       if numbers == true
-        value = to_s
-        return value if !values.is_a?(Array) || values.include?(value)
+        catch :wrong do
+          return EnsureIt.ensure_string(to_s, **opts)
+        end
       end
       EnsureIt.raise_error(
         :ensure_string!,
-        **EnsureIt.ensure_string_error_options(**opts)
+        **EnsureIt.ensure_string_error(numbers: numbers, **opts)
       )
     end
   end
 
-  def self.ensure_string_error_options(**opts)
-    unless opts.key?(opts[:message])
-      opts[:message] =
-        if opts[:numbers] == true
-          '#{subject} should be a String, Symbol, Numeric or Rational'
-        else
-          '#{subject} should be a String or a Symbol'
-        end
+  def self.ensure_string(str, values: nil, downcase: nil, name_of: nil, **opts)
+    if name_of.nil?
+      value = downcase == true ? str.downcase : str
+    else
+      value = EnsureIt::StringUtils.ensure_name(
+        str, downcase: downcase, name_of: name_of, **opts
+      )
+      throw :wrong if value.nil?
+    end
+    throw :wrong if values.is_a?(Array) && !values.include?(value)
+    value
+  end
+
+  def self.ensure_string_error(**opts)
+    unless opts.key?(:message)
+      opts[:message] = '#{subject} should be a String or a Symbol'
+      if opts[:numbers] == true
+        opts[:message] << ' or a Numeric'
+      end
+      if opts.key?(:name_of)
+        opts[:message] << " and should be a name of #{opts[:name_of]}"
+      end
+      if opts[:values].is_a?(Array)
+        opts[:message] << " and should contained in #{opts[:values]}"
+      end
     end
     opts
   end

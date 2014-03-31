@@ -4,7 +4,7 @@ module EnsureIt
       default
     end
 
-    def ensure_array!(*args, default: nil, **opts)
+    def ensure_array!(*args, **opts)
       opts[:message] ||= '#{subject} should be an Array'
       EnsureIt.raise_error(:ensure_array!, **opts)
     end
