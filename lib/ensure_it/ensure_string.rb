@@ -1,14 +1,55 @@
-# @!method ensure_it(opts = {})
+# @!method ensure_string(opts = {})
 #
-# Ensures that subject is a symbol. For symbols return self, for strings,
-# value, converted to symbol, for others - value, specified in default option
-# or nil.
+# Ensures that subject is a string. Without options for symbols returns
+# converted to string value, for strings, returns self, for others - value,
+# specified in default option or nil. With `numbers: true` option, also
+# converts numbers to string.
+#
+# With `downcase: true` option downcases value.
+#
+# If `values` option specified, returns default value if converted value
+# is not included in specified array. **Warning:** there are no type checks
+# of array elements, so if you, for example, specify array of integers here,
+# this method will allways return default value.
+#
+# `name_of` option, if specified, should be one of: `:local`,
+# `:instance_variable`, `:class_variable`, `:setter`, `:getter`, `:checker`,
+# `:bang`, `:method`, `:class` or its string equivalents. This option allow you
+# to be ensured that return value is a valid name of local variable,
+# instance variable, class variable, setter method, getter method, checker
+# method (ending with `?`), bang method (ending with `!`), any method or
+# class, respectively to option values above. See examples below for details.
+# If you want to convert underscored downcased notations of classes, use
+# `downcase: true` option. Also, with `name_of: :class`, `exist: true` option
+# can specified to ensures that class exists.
+#
+# @example  usage of `name_of` option
+# ```ruby
+#   'some text'.ensure_string(name_of: :local) # => nil
+#   'some_text'.ensure_string(name_of: :local) # => 'some_text'
+#
+#   'some_text'.ensure_string(name_of: :instance_variable) # => '@some_text'
+#   '@some_text'.ensure_string(name_of: :instance_variable) # => '@some_text'
+#   'some_text='.ensure_string(name_of: :instance_variable) # => '@some_text'
+#
+#   'some_text'.ensure_string(name_of: :setter) # => 'some_text='
+#   'some_text?'.ensure_string(name_of: :setter) # => 'some_text='
+#   'some_text='.ensure_string(name_of: :setter) # => 'some_text='
+#
+#   'some_text'.ensure_string(name_of: :class) # => nil
+#   'Some::Text'.ensure_string(name_of: :class) # => Some::Text
+#   'some_text'.ensure_string(name_of: :class, downcase: true) # => SomeText
+#   'some/text'.ensure_string(name_of: :class, downcase: true) # => Some::Text
+#   'Some::Text'.ensure_string(name_of: :class, exist: true) # => nil
+#   'Object'.ensure_string(name_of: :class, exist: true) # => 'Object'
+# ```
 #
 # @param [Hash] opts the options
 # @option opts [Object] :default (nil) default value for wrong subject
-# @option opts [Array] :values
-# @option opts [Boolean] :downcase
-# @option opts [<String, Symbol>] :name_of
+# @option opts [Array] :values an array of possible values
+# @option opts [Boolean] :downcase convert string to downcase
+# @option opts [<String, Symbol>] :name_of string should be a name of variable
+#   or method
 
 # @private
 module EnsureIt
