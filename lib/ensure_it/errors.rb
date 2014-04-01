@@ -59,8 +59,8 @@ module EnsureIt
     end
   end
 
-  def self.raise_error(method_name, message: nil, error: Error, **opts)
-    error = Error unless error <= Exception
+  def self.raise_error(method_name, message: nil, error: nil, **opts)
+    error = EnsureIt.config.error_class if error.nil? || !(error <= Exception)
     error_msg = ErrorMessage.new(method_name, message, caller[1..-1])
     # save message in backtrace in variables to not call getter
     # methods of error_msg instance in raise call

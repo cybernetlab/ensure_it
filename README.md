@@ -69,7 +69,7 @@ $ gem install ensure_it
 
 ## Configuration
 
-For this moment only one configuration option available - global setting of smart errors (see [Usage section](#usage)):
+For this moment only two configuration options available - global setting of smart errors (see [Usage section](#usage)) and default errors class (that will be used if it doesn't specified in methods calls):
 
 ```ruby
 require 'ensure_it'
@@ -77,6 +77,7 @@ require 'ensure_it'
 EnsureIt.configuration do |config|
   # config.errors = :standard
   config.errors = :smart
+  config.error_class = ArgumentError
 end
 ```
 
@@ -375,6 +376,7 @@ thor ensure_it:benchmark:all -n 1000 -s
 `0.1.4`
 * name_of option added to `ensure_symbol` and `ensure_string`
 * string options added to `ensure_class`
+* config_error configuration option added
 
 `0.1.3`
 * downcase option added to `ensure_symbol` and `ensure_string`
