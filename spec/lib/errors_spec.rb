@@ -10,11 +10,14 @@ end
 describe EnsureIt do
   before do
     @errors = EnsureIt.config.errors
+    @error_class = EnsureIt.config.error_class
     EnsureIt::Config.instance_variable_set(:@errors, nil)
+    EnsureIt::Config.instance_variable_set(:@error_class, nil)
   end
 
   after do
     EnsureIt::Config.instance_variable_set(:@errors, @errors)
+    EnsureIt::Config.instance_variable_set(:@error_class, @error_class)
   end
 
   describe '.raise_error' do
@@ -28,6 +31,13 @@ describe EnsureIt do
       expect {
         call_error(:test_method, error: ArgumentError, message: 'test')
       }.to raise_error ArgumentError, 'test'
+    end
+
+    it 'raises error of class, specified with error_class=' do
+      EnsureIt.configure { |c| c.error_class = ArgumentError }
+      expect {
+        call_error(:test_method)
+      }.to raise_error ArgumentError
     end
 
     it 'raises error with callers backtrace' do

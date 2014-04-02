@@ -11,7 +11,7 @@ The main goal of EnsureIt is to provide as fast executed code as it possible wit
 
 > **Note:** this library doesn't support ruby older than `2.0.0`
 
-Simplest example (you can find it at `examples/symbol.rb`):
+Simple example (you can find it at `examples/symbol.rb`):
 
 ```ruby
 require 'rubygems'
@@ -69,7 +69,7 @@ $ gem install ensure_it
 
 ## Configuration
 
-For this moment only one configuration option available - global setting of smart errors (see [Usage section](#usage)):
+For this moment only two configuration options available - global setting of smart errors (see [Usage section](#usage)) and default errors class (that will be used if it doesn't specified in methods calls):
 
 ```ruby
 require 'ensure_it'
@@ -77,6 +77,7 @@ require 'ensure_it'
 EnsureIt.configuration do |config|
   # config.errors = :standard
   config.errors = :smart
+  config.error_class = ArgumentError
 end
 ```
 
@@ -375,6 +376,7 @@ thor ensure_it:benchmark:all -n 1000 -s
 * name_of option added to `ensure_symbol` and `ensure_string`
 * string options added to `ensure_class`
 * code optimization
+* config_error configuration option added
 * `ensure_array` interface changed
 
 `0.1.3`

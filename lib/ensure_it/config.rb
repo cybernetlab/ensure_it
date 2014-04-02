@@ -10,6 +10,15 @@ module EnsureIt
       value = value.to_sym if value.is_a?(String)
       @errors = ERRORS.include?(value) ? value : ERRORS.first
     end
+
+    def self.error_class(value = nil)
+      value.nil? ? @error_class ||= EnsureIt::Error : self.error_class = value
+    end
+
+    def self.error_class=(value)
+      return unless value.is_a?(Class) && value <= Exception
+      @error_class = value
+    end
   end
 
   def self.config
