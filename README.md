@@ -11,7 +11,7 @@ The main goal of EnsureIt is to provide as fast executed code as it possible wit
 
 > **Note:** this library doesn't support ruby older than `2.0.0`
 
-Simplest example (you can find at `examples/symbol.rb`):
+Simplest example (you can find it at `examples/symbol.rb`):
 
 ```ruby
 require 'rubygems'
@@ -185,20 +185,19 @@ true.ensure_float # => nil
 
 ### ensure_array, ensure_array!
 
-By default, returns Array only for Array itself and **empty** array (not nil) for others. This method have many usefull optioins. Just list it in example:
+By default, returns Array only for Array itself and **empty** array (not nil) for others. You can specify any number of arguments. Each argument can be a Proc or a symbol. If Proc given, it will be used as argument for `map` method of array, if symbol specified and it is one of `compact`, `flatten`, `reverse`, `rotate`, `shuffle`, `sort`, `sort_desc`, `uniq` then respective method wiill be called for array (for `sort_desc`, `sort` and then `reverse` will be called). In other cases specified method will be called for each array element inside `map` function. All arguments are processed in specified order. Examples:
 
 ```ruby
 [1, nil, 2].ensure_array # => [1, nil, 2]
 true.ensure_array # => []
 true.ensure_array(default: nil) # => nil
-[1, nil, 2].ensure_array(compact: true) # => [1, 2]
-[1, [2, 3], 4].ensure_array(flatten: true) # => [1, 2, 3, 4]
-[1, [5, 6], 4].ensure_array(flatten: true, sorted: true) # => [1, 4, 5, 6]
-[1, [5, 6], 4].ensure_array(flatten: true, sorted: :desc) # => [6, 5, 4, 1]
-[1, [5, 6], 4].ensure_array(flatten: true, ordered: true) # => alias to sorted
+[1, nil, 2].ensure_array(:compact) # => [1, 2]
+[1, [2, 3], 4].ensure_array(:flatten) # => [1, 2, 3, 4]
+[1, [5, 6], 4].ensure_array(:flatten, :sort) # => [1, 4, 5, 6]
+[1, [5, 6], 4].ensure_array(:flatten, :sort_desc) # => [6, 5, 4, 1]
 arr = ['some', nil, :value]
-arr.ensure_array(:ensure_symbol, compact: true) # => [:some, :value]
-arr.ensure_array(:ensure_symbol!, compact: true) # => raise on second element
+arr.ensure_array(:ensure_symbol, :compact) # => [:some, :value]
+arr.ensure_array(:ensure_symbol!, :compact) # => raise on second element
 arr = ['some', :value]
 arr.ensure_array(:to_s) # => ['some', 'value'] standard methods can be used
 arr.ensure_array(:ensure_string, :to_sym) # => [:some, :value] you can chain methods
@@ -375,6 +374,8 @@ thor ensure_it:benchmark:all -n 1000 -s
 `0.1.4`
 * name_of option added to `ensure_symbol` and `ensure_string`
 * string options added to `ensure_class`
+* code optimization
+* `ensure_array` interface changed
 
 `0.1.3`
 * downcase option added to `ensure_symbol` and `ensure_string`

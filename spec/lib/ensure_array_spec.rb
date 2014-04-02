@@ -19,29 +19,27 @@ describe EnsureIt do
       expect(call_for(obj)).to eq obj
     end
 
-    it 'compacts array with compact option' do
-      expect(call_for([1, nil, 2], compact: true)).to eq [1, 2]
+    it 'compacts array with compact argument' do
+      expect(call_for([1, nil, 2], :compact)).to eq [1, 2]
     end
 
-    it 'flattens array with flatten option' do
-      expect(call_for([1, [2, 3], 4], flatten: true)).to eq [1, 2, 3, 4]
+    it 'flattens array with flatten argument' do
+      expect(call_for([1, [2, 3], 4], :flatten)).to eq [1, 2, 3, 4]
     end
 
-    [:sorted, :ordered].each do |o|
-      it "flattens and then sorts array with flatten and #{o} options" do
-        expect(
-          call_for([1, [5, 6], 4], flatten: true, o => true)
-        ).to eq [1, 4, 5, 6]
-      end
+    it 'flattens and then sorts array with flatten and sort arguments' do
+      expect(
+        call_for([1, [5, 6], 4], :flatten, :sort)
+      ).to eq [1, 4, 5, 6]
+    end
 
-      it "sorts descending with #{o}: :desc option" do
-        expect(call_for([1, 5, 6, 4], o => :desc)).to eq [6, 5, 4, 1]
-      end
+    it 'sorts descending with sort_desc argument' do
+      expect(call_for([1, 5, 6, 4], :sort_desc)).to eq [6, 5, 4, 1]
     end
 
     it 'calls :ensure_* for each element' do
       arr = ['s', nil, :v]
-      expect(call_for(arr, :ensure_symbol, compact: true)).to eq [:s, :v]
+      expect(call_for(arr, :ensure_symbol, :compact)).to eq [:s, :v]
     end
 
     it 'calls standard method for each element' do
@@ -52,6 +50,12 @@ describe EnsureIt do
     it 'chains methods for each element' do
       arr = ['s', :v]
       expect(call_for(arr, :ensure_string, :to_sym)).to eq [:s, :v]
+    end
+
+    it 'selects only values, specified in values option' do
+      expect(
+        call_for([1, 5, 6, 4], values: [1, 6, 8])
+      ).to eq [1, 6]
     end
   end
 
