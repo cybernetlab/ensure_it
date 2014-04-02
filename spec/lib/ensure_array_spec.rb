@@ -44,7 +44,7 @@ describe EnsureIt do
 
     it 'calls standard method for each element' do
       arr = ['s', :v]
-      expect(call_for(arr, :to_s)).to eq ['s', 'v']
+      expect(call_for(arr, :to_s)).to eq %w(s v)
     end
 
     it 'chains methods for each element' do
@@ -56,6 +56,11 @@ describe EnsureIt do
       expect(
         call_for([1, 5, 6, 4], values: [1, 6, 8])
       ).to eq [1, 6]
+    end
+
+    it 'creates array with make option' do
+      expect(call_for(1, make: true)).to eq [1]
+      expect(call_for(nil, make: true)).to eq []
     end
   end
 

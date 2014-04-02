@@ -186,12 +186,14 @@ true.ensure_float # => nil
 
 ### ensure_array, ensure_array!
 
-By default, returns Array only for Array itself and **empty** array (not nil) for others. You can specify any number of arguments. Each argument can be a Proc or a symbol. If Proc given, it will be used as argument for `map` method of array, if symbol specified and it is one of `compact`, `flatten`, `reverse`, `rotate`, `shuffle`, `sort`, `sort_desc`, `uniq` then respective method wiill be called for array (for `sort_desc`, `sort` and then `reverse` will be called). In other cases specified method will be called for each array element inside `map` function. All arguments are processed in specified order. Examples:
+By default, returns Array only for Array itself and **empty** array (not nil) for others. You can specify any number of arguments. Each argument can be a Proc or a symbol. If Proc given, it will be used as argument for `map` method of array, if symbol specified and it is one of `compact`, `flatten`, `reverse`, `rotate`, `shuffle`, `sort`, `sort_desc`, `uniq` then respective method wiill be called for array (for `sort_desc`, `sort` and then `reverse` will be called). In other cases specified method will be called for each array element inside `map` function. All arguments are processed in specified order. Also you can use `make: true` option to make array with object as single element if object is not an array (for `nil` empty array created). Examples:
 
 ```ruby
 [1, nil, 2].ensure_array # => [1, nil, 2]
-true.ensure_array # => []
-true.ensure_array(default: nil) # => nil
+10.ensure_array # => []
+10.ensure_array(default: nil) # => nil
+10.ensure_array(make: true) # => [10]
+nil.ensure_array(make: true) # => []
 [1, nil, 2].ensure_array(:compact) # => [1, 2]
 [1, [2, 3], 4].ensure_array(:flatten) # => [1, 2, 3, 4]
 [1, [5, 6], 4].ensure_array(:flatten, :sort) # => [1, 4, 5, 6]
@@ -371,6 +373,10 @@ thor ensure_it:benchmark:all -n 1000 -s
 ```
 
 ## Changelog
+
+`0.1.5`
+* added `EnsureIt.refined?`
+* `ensure_array` `make` option added
 
 `0.1.4`
 * name_of option added to `ensure_symbol` and `ensure_string`
