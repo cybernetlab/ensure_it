@@ -60,7 +60,7 @@ describe EnsureIt do
     it 'raises correct error message with :numbers option' do
       expect { call_for(nil, numbers: true) }.to raise_error(
         EnsureIt::Error,
-        /should be a String, Symbol, Numeric or Rational/
+        /should be a String or a Symbol or a Numeric/
       )
     end
   end
