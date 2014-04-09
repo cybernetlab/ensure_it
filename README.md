@@ -320,6 +320,15 @@ AwesomeClass.new.awesome_method(0) # => raises EnsureIt::Error with message
 
 Please read carefully [refinements](http://www.ruby-doc.org/core-2.1.1/doc/syntax/refinements_rdoc.html) documentation before using refined EnsureIt. Don't forget to call `using EnsureIt` in every file (not class or method if your class or method placed in many files) you need it.
 
+If you using refined library, but want to support mode without refinements, active refines with condition like this:
+
+```ruby
+module SomeModule
+  using EnsureIt if EnsureIt.refined?
+  ...
+end
+```
+
 ## Benchmarking
 
 In development mode a set of thor tasks under 'ensure_it:benchmark' namespace provided for benchmarking and profiling any library method. Also tasks `:non_bang`, `:bang` and `:all` provided for benchmarking all non-bang methods, all bang methods and allmost all methods respectively. To benchmark refined version of library, use `USE_REFINES=true` environment variable.
@@ -374,6 +383,9 @@ thor ensure_it:benchmark:all -n 1000 -s
 
 ## Changelog
 
+`1.0.0`
+
+
 `0.1.5`
 * added `EnsureIt.refined?`
 * `ensure_array` `make` option added
@@ -416,9 +428,7 @@ thor ensure_it:benchmark:all -n 1000 -s
 
 ## Todo
 
-* class from string converting for ensure_class
-* ensure_file_name
-* ensure_var_name
+* ensure file name
 * enlarge number of options for arrays and hashes
 * block processing for arrays and hashes
 * rspec matchers
