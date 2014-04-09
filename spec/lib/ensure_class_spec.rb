@@ -22,8 +22,8 @@ describe EnsureIt do
       expect(call_for(Array, Enumerable, Array)).to eq Array
     end
 
-    it 'and converts string to class with string option' do
-      expect(call_for('Array', string: true)).to eq Array
+    it 'and converts string to class with strings option' do
+      expect(call_for('Array', strings: true)).to eq Array
     end
   end
 

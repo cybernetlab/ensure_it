@@ -87,7 +87,7 @@ EnsureIt does monkey-patching or provides refines (see [Refinements section](#re
 
 For example `ensure_symbol` method returns symbol itself for Symbols, converted to symbol value for Strings and nil for all other. Same way `ensure_symbol!` returns symbol for String and Symbol, and raises exception for all other.
 
-The special thing, that EnsureIt can do (and do it by default) is smart error messages in bang methods. In most cases, EnsureIt guesses right context in wich `ensure_*` method called and froms more informative message. It recognizes name of local variable if method called for variable like `my_var.ensure_symbol`, argument name, if variable is argument of method and method calls itself like `'some_string'.to_sym.ensure_symbol` - so `ensure_symbol` called on result of `to_sym` method. You can disable this functionality at all (see [Configuration section](#configuration)) or override globally configuration for any method call by `smart` option like this `:symbol.ensure_symbol(smart: true)` or `:symbol.ensure_symbol(smart: false)`. In any way, this `:smart` errors doesn't affect execution speed because the analyzing block of code executed only on exception - not on every `ensure_*` call.
+The special thing, that EnsureIt can do (and do it by default) is smart error messages in bang methods. In most cases, EnsureIt guesses right context in wich `ensure_*` method called and forms more informative message. It recognizes name of local variable if method called for variable like `my_var.ensure_symbol`, argument name, if variable is argument of method and method calls itself like `'some_string'.to_sym.ensure_symbol` - so `ensure_symbol` called on result of `to_sym` method. You can disable this functionality at all (see [Configuration section](#configuration)) or override global configuration for any method call by `smart` option like this `:symbol.ensure_symbol(smart: true)` or `:symbol.ensure_symbol(smart: false)`. In any way, this `:smart` errors doesn't affect execution speed because the analyzing block of code executed only on exception - not on every `ensure_*` call.
 
 For example, following code
 
@@ -186,7 +186,7 @@ true.ensure_float # => nil
 
 ### ensure_array, ensure_array!
 
-By default, returns Array only for Array itself and **empty** array (not nil) for others. You can specify any number of arguments. Each argument can be a Proc or a symbol. If Proc given, it will be used as argument for `map` method of array, if symbol specified and it is one of `compact`, `flatten`, `reverse`, `rotate`, `shuffle`, `sort`, `sort_desc`, `uniq` then respective method wiill be called for array (for `sort_desc`, `sort` and then `reverse` will be called). In other cases specified method will be called for each array element inside `map` function. All arguments are processed in specified order. Also you can use `make: true` option to make array with object as single element if object is not an array (for `nil` empty array created). Examples:
+By default, returns Array only for Array itself and **empty** array (not nil) for others. You can specify any number of arguments. Each argument can be a Proc or a symbol. If Proc given, it will be used as argument for `map` method of array, if symbol specified and it is one of `compact`, `flatten`, `reverse`, `rotate`, `shuffle`, `sort`, `sort_desc`, `uniq` then respective method will be called for array (for `sort_desc`, `sort` and then `reverse` will be called). In other cases specified method will be called for each array element inside `map` function. All arguments are processed in specified order. Also you can use `make: true` option to make array with object as single element if object is not an array (for `nil` empty array created). Examples:
 
 ```ruby
 [1, nil, 2].ensure_array # => [1, nil, 2]
@@ -206,21 +206,21 @@ arr.ensure_array(:to_s) # => ['some', 'value'] standard methods can be used
 arr.ensure_array(:ensure_string, :to_sym) # => [:some, :value] you can chain methods
 ```
 
-Simple usage example:
+Simple usage example (`examples/array.rb`):
 
 ```ruby
 require 'ensure_it'
 
 class Awesome
   def self.define_getters(*args)
-    args.ensure_array(:ensure_symbol, compact: true).each do |n|
+    args.ensure_array(:ensure_symbol, :compact).each do |n|
       define_method(n) { instance_variable_get("@#{n}") }
     end
   end
 end
 
 Awesome.define_getters(:one, 'two', nil, false, Object, :three)
-Awesome.methods(false) #=> [:one, :two, :three]
+puts Awesome.instance_methods(false).inspect #=> [:one, :two, :three]
 ```
 
 ### ensure_hash, ensure_hash!
@@ -230,29 +230,30 @@ Returns Hash only for Hash itself and **empty** hash (not nil) for others. Symbo
 ```ruby
 {some: 0, 'key' => 1}.ensure_hash # => {some: 0, 'key' => 1}
 0.ensure_hash # => {}
-0.ensure_hash(wrong: nil) # => nil
+0.ensure_hash(default: nil) # => nil
 {some: 0, 'key' => 1}.ensure_hash(symbolize_keys: true) # => {some: 0, key: 0}
 ```
 
 ### ensure_instance_of, ensure_instance_of!
 
-Returns self only if it instance of specified class or nil (or raise) elsewhere:
+Returns self only if it is an instance of specified class or nil (or raise) elsewhere:
 
 ```ruby
 10.ensure_instance_of(Fixnum) # => 10
 10.0.ensure_instance_of(Fixnum) # => nil
-10.0.ensure_instance_of(Fixnum, wrong: -1) # => -1
+10.0.ensure_instance_of(Fixnum, default: -1) # => -1
 ```
 
 ### ensure_class, ensure_class!
 
-Returns self only if it is a class and optionally have specified ancestors or nil (or raise) elsewhere:
+Returns self only if it is a class and optionally have specified ancestors or nil (or raise) elsewhere. With `strings: true` option, returns class, specified in string:
 
 ```ruby
 10.ensure_class # => nil
 String.ensure_class # => String
 Fixnum.ensure_class(Integer) # => Fixnum
 Float.ensure_class(Integer) # => nil
+'Array'.ensure_class(strings: true) # => Array
 
 module CustomModule; end
 class CustomArray < Array;
@@ -263,11 +264,30 @@ Array.ensure_class(Enumerable, CustomModule) # => nil
 Array.ensure_class(Enumerable) # => Array
 ```
 
+### ensure_boolean, ensure_boolean!
+
+Returns true or false for booleans itself and for numbers (0 - false, other - true). With `strings: true` option, returns `true` for String and Symbols with values `'true'`, `'yes'`, `'y'`, `'1'` and `false` for others. For numbers with `positive: true` option returns `true` only for positive numbers.
+
+```ruby
+:true.ensure_boolean # => true
+:false.ensure_boolean # => false
+1.ensure_boolean # => true
+0.ensure_boolean # => false
+-1.ensure_boolean # => true
+-1.ensure_boolean(positive: true) # => false
+1.ensure_boolean(numbers: false) # => nil
+'true'.ensure_boolean # => nil
+'true'.ensure_boolean(strings: true) # => true
+'yes'.ensure_boolean(strings: true) # => true
+:true.ensure_boolean(strings: true) # => true
+'false'.ensure_boolean(strings: true) # => false
+```
+
 ### Common options for all methods
 
 |option|possible values|meaning|
 |------|---------------|-------|
-|`:values`|Array|(not used in `ensure_instance_of` and `ensure_hash`) an array of possible values. If value doesn't included in this array, default value returned or exception raised for bang methods. Note that library doesn't check types of this array elements, so be sure to specify array with right elements here.
+|`:values`|Array|(not used in `ensure_instance_of`, `ensure_hash` and `ensure_boolean`) an array of possible values. If value doesn't contained in this array, default value returned or exception raised for bang methods. Note that library doesn't check types of this array elements, so be sure to specify array with right elements here.
 
 ### Common options for all non-bang methods
 
@@ -300,7 +320,7 @@ Or without bundler:
 require 'ensure_it_refined'
 ```
 
-Then activate EnsureIt refines by `using EnsureIt` in needed scope:
+Then activate EnsureIt refines by `using EnsureIt` in appropriated scope:
 
 ```ruby
 require 'ensure_it_refined'
@@ -320,7 +340,7 @@ AwesomeClass.new.awesome_method(0) # => raises EnsureIt::Error with message
 
 Please read carefully [refinements](http://www.ruby-doc.org/core-2.1.1/doc/syntax/refinements_rdoc.html) documentation before using refined EnsureIt. Don't forget to call `using EnsureIt` in every file (not class or method if your class or method placed in many files) you need it.
 
-If you using refined library, but want to support mode without refinements, active refines with condition like this:
+If you using refined library, but want to support mode without refinements, activate refines with condition like this:
 
 ```ruby
 module SomeModule
@@ -384,7 +404,8 @@ thor ensure_it:benchmark:all -n 1000 -s
 ## Changelog
 
 `1.0.0`
-
+* first release version
+* added `ensure_boolean`
 
 `0.1.5`
 * added `EnsureIt.refined?`

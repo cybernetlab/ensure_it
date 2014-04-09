@@ -1,7 +1,7 @@
 module EnsureIt
   module StringUtils
     NAME_TYPES = %i(local instance_variable class_variable setter getter
-                    checker bang method class)
+                    checker bang method class file)
     NAME_REGEXP = /\A
       (?<class_access>@{1,2})?
       (?<name>[a-z_][a-zA-Z_0-9]*)
@@ -13,6 +13,7 @@ module EnsureIt
     CLASS_NAME_DOWNCASE_REGEXP = /\A
       [a-z][a-zA-Z_0-9]*(?:\/[a-z][a-zA-Z_0-9]*)*
     \z/x
+    FILE_EXTENSION_REGEXP = /\A(?<name>.*)(?<ext>\.[^.]+)\z/
 
     using EnsureIt if ENSURE_IT_REFINED
 
@@ -40,6 +41,26 @@ module EnsureIt
           rescue NameError
             return nil
           end
+        end
+        str
+      elsif name_of == :file
+        if extension = opts[:extension].ensure_string
+          extension.gsub!(/\A\.+/, '')
+          str.gsub!(/\A\.+/, '')
+          if str =~ FILE_EXTENSION_REGEXP
+            str.gsub!(FILE_EXTENSION_REGEXP, '\1.' + extension)
+          else
+            str = [str, extension].join('.')
+          end
+        end
+        if opts[:exist] == true
+          if File.exist?(File.expand_path(str, Dir.pwd))
+            str = File.expand_path(str, Dir.pwd)
+          else
+            return nil
+          end
+        else
+          str = File.expand_path(str, Dir.pwd)
         end
         str
       else

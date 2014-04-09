@@ -30,16 +30,16 @@ module EnsureIt
   patch String do
     using EnsureIt if ENSURE_IT_REFINED
 
-    def ensure_class(*args, default: nil, string: nil, **opts)
-      return default if string != true
+    def ensure_class(*args, default: nil, strings: nil, **opts)
+      return default if strings != true
       catch :wrong do
         return EnsureIt.ensure_class_string(self, *args, **opts)
       end
       default
     end
 
-    def ensure_class!(*args, string: nil, **opts)
-      if string == true
+    def ensure_class!(*args, strings: nil, **opts)
+      if strings == true
         catch :wrong do
           return EnsureIt.ensure_class_string(self, *args, **opts)
         end
